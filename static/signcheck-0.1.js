@@ -1,0 +1,132 @@
+$('#passwordConfirm, #inputPassWord').focusout(
+    function () {
+        var PassWord = $('#inputPassWord').val();
+        var PassWord2 = $('#passwordConfirm').val();
+        if (PassWord && PassWord2 && PassWord2 != PassWord){
+            $(this).siblings('span').text('两次密码不一致');
+        }
+        else {
+            $(this).siblings('span').text('');
+        }
+    }
+);
+
+function isEmail(str) {
+    var reg = new RegExp("^([a-zA-Z0-9_-])+@([a-zA-Z0-9_-])+(.[a-zA-Z0-9_-])+");
+    console.log('email:', reg.test(str.trim()));
+    return reg.test(str.trim())
+}
+
+function isTel(str) {
+    var reg = new RegExp("^1[0-9]{10}");
+    console.log('tel:',reg.test(str.trim()));
+    return reg.test(str.trim())
+}
+
+(function (jq) {
+
+    jq.extend({
+        loginCheck: function () {
+            $('#sign-btn, #reg-btn').click(function () {
+                var flag = true;
+                $('input').siblings('span').text('');
+                $('input').each(function (k, v) {
+                    if ($(v).val()){
+                        $(v).siblings('span').text('');
+                        if ($(v).prop('name') == ('username')) {
+                            if ($(v).val().length < 6) {
+                                $(v).siblings('span').text('用户名长度必须大于6');
+                                flag = false;
+                                return false
+                            }
+                            else if ($(v).val().length > 32) {
+                                $(v).siblings('span').text('用户名长度必须小于32');
+                                flag = false;
+                                return false
+                            }
+                            else {
+                                $(v).siblings('span').text('');
+                            }
+                        }
+
+                        if ($(v).prop('name') == ('telephone')) {
+                            if (!isTel($(v).val())) {
+                                $(v).siblings('span').text('请输入正确的手机号码');
+                                flag = false;
+                                return false
+                            }
+                            else {
+                                $(v).siblings('span').text('');
+                            }
+                        }
+
+                        if ($(v).prop('name') == ('nickname')) {
+                            if ($(v).val().length > 32) {
+                                $(v).siblings('span').text('昵称长度必须小于32');
+                                flag = false;
+                                return false
+                            }
+                            else {
+                                $(v).siblings('span').text('');
+                            }
+                        }
+
+                        if ($(v).prop('name') == ('email')) {
+                            if (!isEmail($(v).val())) {
+                                $(v).siblings('span').text('请输入正确的邮箱地址');
+                                flag = false;
+                                return false
+                            }
+                            else {
+                                $(v).siblings('span').text('');
+                            }
+                        }
+
+                        if ($(v).prop('type') == ('password')) {
+                            console.log($(v));
+                            if ($(v).val().length < 6) {
+                                $(v).siblings('span').text('密码长度必须大于6');
+                                flag = false;
+                                console.log('走这里:');
+                                return false
+                            }
+                            else if ($(v).val().length > 64) {
+                                $(v).siblings('span').text('密码长度必须小于64');
+
+                                flag = false;
+                                return false
+                            }
+                            else {
+                                $(v).siblings('span').text('');
+                            }
+                        }
+
+                    }
+                    else {
+                        if ($(v).attr('null')) {
+                        }
+                        else {
+                            $(v).siblings('span').text($(this).prop('placeholder'));
+                            flag = false;
+                            return false
+                        }
+                    }
+
+
+
+                });
+                var PassWord = $('#inputPassWord').val();
+                var PassWord2 = $('#passwordConfirm').val();
+
+                if (PassWord && PassWord2 && PassWord != PassWord2){
+                    flag = false;
+                    $('#passwordConfirm').siblings('span').text('两次密码不一致');
+                    return flag
+                }
+
+                return flag;
+
+            })
+        }
+    });
+})(jQuery);

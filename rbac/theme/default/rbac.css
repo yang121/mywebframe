@@ -1,0 +1,66 @@
+
+.rbac-hide {
+    display: none;
+}
+
+.rbac-menu-item .rbac-menu-body {
+    /*margin-left: 20px;*/
+}
+
+.rbac-menu-body a {
+    display: block;
+    background-color: #f5f5f5;
+    line-height: 36px;
+    text-align: center;
+    color: #777;
+    cursor: pointer;
+}
+
+.rbac-menu-body a.rbac-active {
+    display: block;
+    background-color: #f5f5f5;
+    line-height: 36px;
+    text-align: center;
+    color: #777;
+    cursor: pointer;
+}
+
+/*.menu div {*/
+    /*background-color: #2e6da4;*/
+    /*line-height: 36px;*/
+    /*text-align: center;*/
+    /*color: white;*/
+/*}*/
+
+.rbac-menu-item:first-child {
+    background-color: #2e6da4;
+    line-height: 36px;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+}
+
+.rbac-menu-item div div{
+    background-color: #e0e0e0;
+    line-height: 36px;
+    text-align: center;
+    color: white;
+    cursor: pointer;
+}
+
+
+/*.menu div div a{*/
+    /*background-color: #f5f5f5;*/
+    /*line-height: 36px;*/
+    /*text-align: center;*/
+    /*color: #777;*/
+    /*cursor: pointer;*/
+/*}*/
+
+/*.menu div div div a{*/
+    /*background-color: #f5f5f5;*/
+    /*line-height: 36px;*/
+    /*text-align: center;*/
+    /*color: #777;*/
+    /*cursor: pointer;*/
+/*}*/
