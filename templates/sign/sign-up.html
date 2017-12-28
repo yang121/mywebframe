@@ -24,6 +24,9 @@
             opacity: 0;
         }
 
+        .hide {
+            display: none;
+        }
 
     </style>
 </head>
@@ -35,17 +38,20 @@
                 <li role="presentation"><a href="/sign/sign-in.html/"> 登  录 </a></li>
                 <li role="presentation" class="active"><a href="#"> 注  册 </a></li>
             </ul>
-            <form id="sign-box" class="form-horizontal" action="/sign/sign-up.html?md=post" method="POST" novalidate style="line-height: 34px">
+            <form id="sign-box" class="form-horizontal" enctype="multipart/form-data" action="/sign/sign-up.html?md=post" method="POST" novalidate style="line-height: 34px">
 
                 <div class="form-group">
-                    <div class="col-sm-offset-4 col-sm-5">
-                        <img src="/static/imgs/default.jpeg" class="img-responsive img-rounded" id="showAvatar" style="width: 100px; height: 100px; border: solid 1px #dbdbdb">
+                    <div class="col-sm-offset-3 col-sm-5">
+                        <img src="/static/imgs/default.jpeg" class="img-responsive img-rounded" id="showAvatar" style="border: solid 1px #dbdbdb">
                     </div>
 
-                    <div class="col-sm-offset-4 col-sm-5">
+                    <div class="col-sm-offset-3 col-sm-5">
                         {% csrf_token %}
-                        <button type="button" class="btn btn-default" style="width: 100px; margin-top: 5px">上传头像</button>
-                        {{ obj.avatar }}<span style="display: block">{{ obj.errors.avatar.0 }}</span>
+                        <button id="fake-btn" type="button" class="btn btn-default" style="margin-top: 5px">上传头像</button>
+                        <input type="file" class="form-control" id="inputAvatar" null="true">
+                        <br>
+                        <span>{{ obj.errors.avatar.0 }}</span>
+                        {{ obj.avatar }}
                     </div>
                 </div>
 
@@ -70,7 +76,7 @@
                 </div>
 
                 <div class="form-group">
-                    <div class="col-sm-offset-4 col-sm-8">
+                    <div class="col-sm-offset-3 col-sm-8">
                         <label for="inputGender_1" style="vertical-align: middle">男</label>
                         <input type="radio" name="gender" id="inputGender_1" value="1">
                         <label for="inputGender_2"  style="margin-left: 15px; vertical-align: middle">女</label>
@@ -144,6 +150,9 @@
                 {#                    var timestamp = new Date().getTime();#}
                 $("#showAvatar").prop("src", "/" + arg);
                     alert(arg);
+                    console.log('fileinput', $('#avatarValue').val());
+                    $('#avatarValue').val(arg);
+
 
 {#                    $(this).prop("src", $(this).prop("src") + '?'+ timestamp);#}
                 }

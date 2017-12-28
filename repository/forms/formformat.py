@@ -40,6 +40,7 @@ class LoginForm(Form):
             'required': "请填写手机号码",
             'invalid': '请填写正确的手机号码',
         },
+        max_length=11,
         validators=[RegexValidator(r'^1\d{10}$', '请填写正确的手机号码'), ]
         # validators=[RegexValidator(r'^[0-9]+$', '请填写正确的手机号码'), ]
     )
@@ -117,9 +118,10 @@ class RegisterForm(Form):
         }
     )
 
-    avatar = fields.ImageField(
-        widget=widgets.FileInput(attrs={'class': "form-control", 'id': "inputAvatar", 'null': 'true'}),
+    avatar = fields.CharField(
+        widget=widgets.TextInput(attrs={'class': "hide", 'id': "avatarValue", 'null': 'true'}),
         required=False,
+        max_length=128,
     )
 
     password = fields.CharField(
@@ -157,6 +159,7 @@ class RegisterForm(Form):
         },
         required=True,
         validators=[RegexValidator(r'^1\d{10}$', '请填写正确的手机号码')],
+        max_length=11,
     )
 
     gender = fields.ChoiceField(

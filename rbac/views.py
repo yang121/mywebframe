@@ -33,7 +33,7 @@ def sign_in(request):
                 request.session['username'] = user.username
                 request.session['uid'] = user.id
                 if user.avatar:
-                    request.session['avatar'] = 'static/imgs' + user.avatar
+                    request.session['avatar'] = user.avatar
                 else:
                     request.session['avatar'] = 'static/imgs/default.jpeg'
                 initial_permission(request, user.id)
@@ -80,6 +80,7 @@ def sign_up(request):
             return render(request, 'sign/sign-up.html', {'obj': obj})
 
         if obj.is_valid():
+            print(obj.cleaned_data)
             reg_data = {}
             for i in obj.cleaned_data:
                 if obj.cleaned_data[i]:
@@ -91,8 +92,9 @@ def sign_up(request):
                 request.session['login_status'] = True
                 request.session['username'] = user.username
                 request.session['uid'] = user.id
+                print(user.avatar)
                 if user.avatar:
-                    request.session['avatar'] = 'static/imgs' + user.avatar
+                    request.session['avatar'] = user.avatar
                 else:
                     request.session['avatar'] = 'static/imgs/default.jpeg'
                 initial_permission(request, user.id)

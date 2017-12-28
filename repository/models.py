@@ -16,7 +16,7 @@ class User(models.Model):
         (2, '女')
     )
     gender = models.IntegerField(verbose_name='性别', choices=gender_choices, null=True, blank=True)
-    avatar = models.ImageField(verbose_name='头像', upload_to='static/imgs', null=True, blank=True)
+    avatar = models.CharField(verbose_name='头像路径', max_length=128, null=True, blank=True)
     fans = models.ManyToManyField(
         verbose_name='粉丝们',
         to='User',
