@@ -165,3 +165,105 @@ class Permission2Action2Role(models.Model):
 
     def __str__(self):
         return "%s-%s-%s" % (self.permission, self.action, self.role,)
+
+
+
+
+class Column(models.Model):
+    caption = models.CharField(verbose_name='专栏标题', max_length=32)
+    keywords = models.ManyToManyField(
+        verbose_name='关键字',
+        to='Keyword',
+        through='Keyword2Column',
+        related_name='k2c',
+        through_fields=('column', 'keyword'),
+    )
+    img = models.FileField(verbose_name='图片', upload_to='static/imgs/cols/')
+    link = models.CharField(verbose_name='链接',max_length=128, null=True, blank=True)
+    create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True, null=True, blank=True)
+
+    def __str__(self):
+        return "%s[%s]" % (self.caption, self.keywords.all())
+
+
+class Keyword(models.Model):
+    caption = models.CharField(verbose_name='关键字名称', max_length=32)
+
+    goods = models.ManyToManyField(
+        verbose_name='商品',
+        to='Goods',
+        through='Keyword2Goods',
+        related_name='g2k',
+        through_fields=('keyword', 'goods'),   # 坑坑坑！此处要按顺序放置字段，要与原表一样
+    )
+
+    columns = models.ManyToManyField(
+        verbose_name='专栏',
+        to='Column',
+        through='Keyword2Column',
+        related_name='c2k',
+        through_fields=('keyword', 'column'),
+    )
+
+    def __str__(self):
+        return "%s" % self.caption
+
+
+class Keyword2Column(models.Model):
+    keyword = models.ForeignKey('Keyword', verbose_name='关键字')
+    column = models.ForeignKey('Column', verbose_name='专栏',)
+
+    class Meta:
+        unique_together = (
+            ('keyword', 'column'),
+        )
+
+    def __str__(self):
+        return "%s-%s" % (self.column.caption, self.keyword.caption)
+
+
+class Keyword2Goods(models.Model):
+    keyword = models.ForeignKey('Keyword', verbose_name='关键字')
+    goods = models.ForeignKey('Goods', verbose_name='商品')
+
+    class Meta:
+        unique_together = (
+            ('keyword', 'goods'),
+        )
+
+    def __str__(self):
+        return "%s-%s" % (self.goods.caption, self.keyword.caption)
+
+
+class Goods(models.Model):
+    caption = models.CharField(verbose_name='商品标题', max_length=64)
+    brief = models.CharField(verbose_name='简介', max_length=128)
+    keywords = models.ManyToManyField(
+        verbose_name='关键字',
+        to='Keyword',
+        through='Keyword2Goods',
+        related_name='k2g',
+        through_fields=('goods', 'keyword'),
+    )
+    img = models.FileField(verbose_name='图片', upload_to='static/imgs/goods/')
+    price = models.FloatField(verbose_name='价格', max_length=16)
+    create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True, null=True, blank=True)
+
+
+class Ad(models.Model):
+    caption = models.CharField(verbose_name='广告标题', max_length=64)
+    link = models.CharField(verbose_name='链接', max_length=64)
+    img = models.FileField(verbose_name='图片', upload_to='static/imgs/ad/')
+    create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True, null=True, blank=True)
+    place_choices = (
+        (1, '第一位'),
+        (2, '第二位'),
+        (3, '第三位'),
+        (4, '第四位'),
+        (5, '第五位'),
+        (6, '第六位'),
+    )
+    place = models.IntegerField(verbose_name='位置', choices=place_choices, null=True, blank=True, unique=True)
+
+    def __str__(self):
+        return "%s[%s]" % (self.caption, self.place)

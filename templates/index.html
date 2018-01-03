@@ -5,6 +5,84 @@
     <title>欢迎进入首页</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist%20/css/bootstrap.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+        a {
+            text-decoration-line: none;
+        }
+
+        a:hover {
+            text-decoration-line: none;
+        }
+
+        .row{
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .point-active {
+            background-color: white;
+        }
+
+        .ad-pic-box {
+            width: 1140px;
+            height: 300px;
+        }
+
+        .ad-pic-box ul {
+            list-style: none;
+        }
+
+        .ad-pic-box img {
+            position: absolute;
+        }
+
+        .col-sm-3 {
+            margin-bottom: 3.8%;
+        }
+
+        #ad-points {
+            bottom: 1.25%;
+            left: 45%;
+            z-index: 100;
+            position: absolute;
+            padding: 2px 0.5% ;
+            cursor: default
+        }
+
+        .switch-point {
+            width: 13px;
+            height: 13px;
+            margin-left:2px;
+            border-radius: 13px;
+            border: 2px white solid;
+            display: inline-block;
+            vertical-align: middle
+        }
+
+        .switch-btn {
+            width: 2.5%;
+            height: 20%;
+            top: 40%;
+            background-color:  hsla(0,0%,0%,.3);
+            z-index: 100;
+            position: absolute;
+            color: white;
+            font: 20px/2.8 bolder;
+            text-align: center;
+        }
+
+        #ad-perv {
+            left: 1.25%;
+        }
+
+        #ad-next {
+            right: 1.25%;
+        }
+    </style>
 </head>
 <body>
 <nav class="navbar navbar-default">
@@ -66,10 +144,105 @@
                 <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
             </form>
         </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-fluid -->
+    </div><!-- /.container-->
 </nav>
+<div>
+    <div class="container">
+        <div class="row" id="ad-switcher">
+            <div id="switch-btn-group" hidden>
+                <a id="ad-perv" class="switch-btn" href="#"> < </a>
+                <a id="ad-next" class="switch-btn" href="#"> > </a>
+                <ul id="ad-points">
+                    {% for a in ads %}
+                        <li id="si{{ a.place }}" class="switch-point"></li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="col-sm-12 ad-pic-box">
+                <ul>
+                    {% for a in ads %}
+                        <li class="si{{ a.place }}">
+                            <a href="{{ a.link }}" class="ad-pic">
+                                <img class="img-rounded" style="width: 100%" src="{{ a.img }}">
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+        </div>
+
+
+
+        <div class="row">
+            {% for c in cols %}
+                <div class="col-sm-3">
+                    <a href="{{ c.link }}"><img class="img-rounded" style="width: 100%;" src="{{ c.img }}"></a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 <script src="/static/jquery-3.2.1.js"></script>
 <script src="/static/bootstrap-3.3.7-dist%20/js/bootstrap.js"></script>
+<script>
+
+    var adsLength = {{ ads|length }};
+
+    var i = 0;
+    adNext();
+    sw = setInterval("adNext()", 3000);
+
+    function adNext() {
+        if (i >= adsLength){
+            i = 0;
+        }
+        i++;
+        $("#si" + i).addClass('point-active').siblings().removeClass('point-active');
+        $(".si" + i).fadeIn(800).siblings().fadeOut(800);
+        console.log(i);
+    }
+
+    function adPerv() {
+        if (i <= 1){
+            i = adsLength + 1;
+        }
+        i--;
+        $("#si" + i).addClass('point-active').siblings().removeClass('point-active');
+        $(".si" + i).fadeIn(800).siblings().fadeOut(800);
+    }
+
+    $(".switch-btn").on({
+        mouseenter: function () {
+            $(this).css("opacity",1);
+        },
+        mouseleave: function () {
+            $(this).css("opacity",0.3);
+        }
+    });
+
+    $('#ad-perv').click(adPerv);
+    $('#ad-next').click(adNext);
+
+    $('#ad-switcher').on({
+        mouseenter:function () {
+            $('#switch-btn-group').show();
+            clearInterval(sw);
+        },
+        mouseleave:function () {
+            $('#switch-btn-group').hide();
+            sw = setInterval("adNext()", 3000);
+        }
+    });
+
+    $('.switch-point').mousemove(function () {
+            $(this).addClass('point-active').siblings().removeClass('point-active');
+            console.log(this.id);
+            $("." + this.id).fadeIn(800).siblings().fadeOut(800);
+            i = $(this).index() + 1;
+    })
+</script>
 
 </body>
 </html>
