@@ -4,19 +4,8 @@ from django.db.models import Count
 
 def index(request):
 
-    cols = models.Column.objects.all()
-    ads = models.Ad.objects.filter(place__isnull=False).order_by('place')
-    print('ads:', ads)
-    for c in cols:
-        print(c.keyword2column_set, c.img, c.link, c.caption)
-
-    for a in ads:
-        print(a.id, a.caption, a.img, a.link, a.create_time)
-
-    keywords = models.Keyword2Goods.objects.values('keyword__caption').annotate(count=Count(1)).order_by(
-        '-count').first()['keyword__caption']
-
-    ret = {'cols': cols, 'ads': ads, 'keywords': keywords}
+    artis = models.Article.objects.all()
+    ret = {'artis': artis}
 
     return render(request, 'index.html', ret)
 

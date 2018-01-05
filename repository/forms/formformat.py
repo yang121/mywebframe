@@ -118,10 +118,9 @@ class RegisterForm(Form):
         }
     )
 
-    avatar = fields.CharField(
-        widget=widgets.TextInput(attrs={'class': "hide", 'id': "avatarValue", 'null': 'true'}),
+    avatar = fields.FileField(
+        widget=widgets.FileInput(attrs={'id': "imgSelect", 'null': 'true'}),
         required=False,
-        max_length=128,
     )
 
     password = fields.CharField(

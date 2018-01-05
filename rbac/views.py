@@ -5,6 +5,7 @@ from utils.auth_tool import my_auth
 from rbac.service import initial_permission
 from django.core.exceptions import ValidationError
 from django.http import JsonResponse
+from django.conf import settings
 import os
 
 
@@ -35,7 +36,7 @@ def sign_in(request):
                 if user.avatar:
                     request.session['avatar'] = user.avatar
                 else:
-                    request.session['avatar'] = 'static/imgs/default.jpeg'
+                    request.session['avatar'] = settings.DEFAULT_IMG_PATH
                 initial_permission(request, user.id)
                 print(request.session['rbac_permission_session_key'])
                 if request.session['rbac_permission_session_key'].get('/backend.html'):
@@ -68,6 +69,7 @@ def sign_up(request):
     elif request.method == 'POST':
         print(request.POST)
         obj = formformat.RegisterForm(request.POST)
+        ret = {'status': True, 'errors': None}
 
         try:
             code = request.session['code']
@@ -75,40 +77,42 @@ def sign_up(request):
             print('input_code', input_code, ': code', code)
             if code != input_code:
                 raise ValidationError('验证码错误')
+            if obj.is_valid():
+                print(obj.cleaned_data)
+                reg_data = {}
+                for i in obj.cleaned_data:
+                    if obj.cleaned_data[i]:
+                        reg_data[i] = obj.cleaned_data[i]
+                res = models.User.objects.create(**reg_data)
+                print('res:', res)
+                if res:
+                    user = models.User.objects.filter(**reg_data).first()
+                    request.session['login_status'] = True
+                    request.session['username'] = user.username
+                    request.session['uid'] = user.id
+                    print(user.avatar)
+                    if user.avatar:
+                        request.session['avatar'] = user.avatar
+                    else:
+                        request.session['avatar'] = settings.DEFAULT_IMG_PATH
+                    initial_permission(request, user.id)
+                    print(request.session['rbac_permission_session_key'])
+                    if request.session['rbac_permission_session_key'].get('/backend.html'):
+                        request.session['backend'] = True
+                    print(request.session.items())
+                    # return redirect('/index.html')
+                    return JsonResponse(ret)
+
+                obj.add_error('__all__', ValidationError('服务器繁忙，请稍后再试'))
         except Exception as e:
             print(e)
             obj.add_error('__all__', e)
-            return render(request, 'sign/sign-up.html', {'obj': obj})
 
-        if obj.is_valid():
-            print(obj.cleaned_data)
-            reg_data = {}
-            for i in obj.cleaned_data:
-                if obj.cleaned_data[i]:
-                    reg_data[i] = obj.cleaned_data[i]
-            res = models.User.objects.create(**reg_data)
-            print('res:', res)
-            if res:
-                user = models.User.objects.filter(**reg_data).first()
-                request.session['login_status'] = True
-                request.session['username'] = user.username
-                request.session['uid'] = user.id
-                print(user.avatar)
-                if user.avatar:
-                    request.session['avatar'] = user.avatar
-                else:
-                    request.session['avatar'] = 'static/imgs/default.jpeg'
-                initial_permission(request, user.id)
-                print(request.session['rbac_permission_session_key'])
-                if request.session['rbac_permission_session_key'].get('/backend.html'):
-                    request.session['backend'] = True
-                print(request.session.items())
-                return redirect('/index.html')
-
-            obj.add_error('__all__', ValidationError('服务器繁忙，请稍后再试'))
         request.session['login_status'] = False
-        print('注册失败',request.session)
-        return render(request, 'sign/sign-up.html', {'obj': obj})
+        print('注册失败')
+        ret['status'] = False
+        ret['errors'] = obj.errors
+        return JsonResponse(ret)
 
 
 def code(request):

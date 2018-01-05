@@ -18,10 +18,11 @@
             margin-top: -2px; padding: 40px 30px 20px 30px; border: 1px solid #ddd; border-top: 0; border-radius: 4px;
         }
 
-        #inputAvatar {
+        #imgSelect {
             position: absolute;
-            top: 0;
+            top: 0.6em;
             opacity: 0;
+            cursor: pointer;
         }
 
         .hide {
@@ -38,40 +39,37 @@
                 <li role="presentation"><a href="/sign/sign-in.html/"> 登  录 </a></li>
                 <li role="presentation" class="active"><a href="#"> 注  册 </a></li>
             </ul>
-            <form id="sign-box" class="form-horizontal" enctype="multipart/form-data" action="/sign/sign-up.html?md=post" method="POST" novalidate style="line-height: 34px">
+            <form id="sign-box" class="form-horizontal" enctype="multipart/form-data" action="" method="POST" novalidate style="line-height: 34px">
 
                 <div class="form-group">
                     <div class="col-sm-offset-3 col-sm-5">
-                        <img src="/static/imgs/default.jpeg" class="img-responsive img-rounded" id="showAvatar" style="border: solid 1px #dbdbdb">
+                        <img src="/static/imgs/avatar/default.jpeg" class="img-responsive img-rounded" id="previewImg" style="border: solid 1px #dbdbdb">
                     </div>
 
                     <div class="col-sm-offset-3 col-sm-5">
-                        {% csrf_token %}
-                        <button id="fake-btn" type="button" class="btn btn-default" style="margin-top: 5px">上传头像</button>
-                        <input type="file" class="form-control" id="inputAvatar" null="true">
-                        <br>
-                        <span>{{ obj.errors.avatar.0 }}</span>
+                        <button id="fake-btn" type="button" class="btn btn-default" style="margin-top: 0.6em; width: 100%">上传头像</button>
                         {{ obj.avatar }}
+                        <span></span>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <div class="col-sm-10">
-                        {{ obj.username }}<span>{{ obj.errors.username.0 }}</span>
-                    </div>
-                    (必填)
-                </div>
-
-                <div class="form-group">
-                    <div class="col-sm-10">
-                        {{ obj.telephone }}<span>{{ obj.errors.telephone.0 }}</span>
+                        {{ obj.username }}<span></span>
                     </div>
                     (必填)
                 </div>
 
                 <div class="form-group">
                     <div class="col-sm-10">
-                        {{ obj.nickname }}<span>{{ obj.errors.nickname.0 }}</span>
+                        {{ obj.telephone }}<span></span>
+                    </div>
+                    (必填)
+                </div>
+
+                <div class="form-group">
+                    <div class="col-sm-10">
+                        {{ obj.nickname }}<span></span>
                     </div>
                 </div>
 
@@ -119,7 +117,7 @@
 
                 <div class="form-group">
                     <div class="col-sm-12">
-                        <input id='reg-btn' type="submit" class="btn btn-block" style="" value="注 册">
+                        <button id='reg-btn' type="button" class="btn btn-block">注 册</button>
                     </div>
                 </div>
             </form>
@@ -129,40 +127,108 @@
 <script src="/static/jquery-3.2.1.js"></script>
 <script src="/static/signcheck-0.1.js"></script>
 <script>
+    $(function(){
+       bindAvatar();
+    });
+
+    function bindAvatar(){
+        if(window.URL.createObjectURL){
+                bindAvatar2();
+            }else if(window.FileReader){
+                bindAvatar3()
+            }else{
+                bindAvatar1();
+            }
+        }
+
+        /*
+        Ajax上传
+         */
+        function bindAvatar1(){
+            $('#imgSelect').change(
+                // Ajax发送后台，并获取路径
+                // img.src = 获取路径
+                function () {
+                    var formData = new FormData();
+                    formData.append('fafafa', $('#imgSelect')[0].files[0]);  // jQuery 转换
+                    formData.append('csrfmiddlewaretoken', "{{ csrf_token }}");  // jQuery 转换
+                    $.ajax({
+                        url: '/sign/upload/',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,		// 告知jQuery不用处理数据(设置请求头)
+                        processData: false,		// 告知jQuery不用处理数据(设置请求头)
+                        success: function (arg) {
+                            $("#previewImg").prop("src", "/" + arg);
+                            alert(arg);
+                        }
+                    })
+                }
+            )
+        }
+
+        /*
+        本地上传预览
+         */
+        function bindAvatar2(){
+            $('#imgSelect').change(function(){
+                var obj = $(this)[0].files[0];
+                // Ajax发送后台，并获取路径
+                // img.src = 获取路径
+                var v = window.URL.createObjectURL(obj);
+                $('#previewImg').attr('src',v);
+                $('#previewImg').load(function(){
+                    window.URL.revokeObjectURL(v); // 手动释放内存
+                });
+
+            })
+        }
+
+        function bindAvatar3(){
+            $('#imgSelect').change(function(){
+                var obj = $(this)[0].files[0];
+                // Ajax发送后台，并获取路径
+                // img.src = 获取路径
+                var reader = new FileReader();
+                reader.onload = function(e){
+                    $('#previewImg').attr('src',this.result);
+                };
+                reader.readAsDataURL(obj);
+            })
+        }
 
     $('#code-img').click(function () {
         $(this).prop('src', this.src + '?');
     });
 
-    $('#inputAvatar').change(
-        function () {
-{#            $("#input-avatar");#}
-            var formData = new FormData();
-            formData.append('fafafa', $('#inputAvatar')[0].files[0]);  // jQuery 转换
-            formData.append('csrfmiddlewaretoken', "{{ csrf_token }}");  // jQuery 转换
-            $.ajax({
-                url: '/sign/upload/',
-                type: 'POST',
-                data: formData,
-                contentType: false,		// 告知jQuery不用处理数据(设置请求头)
-                processData: false,		// 告知jQuery不用处理数据(设置请求头)
-                success: function(arg){
-                {#                    var timestamp = new Date().getTime();#}
-                $("#showAvatar").prop("src", "/" + arg);
-                    alert(arg);
-                    console.log('fileinput', $('#avatarValue').val());
-                    $('#avatarValue').val(arg);
-
-
+{#    $('#inputAvatar').change(#}
+{#        function () {#}
+{#            var formData = new FormData();#}
+{#            formData.append('fafafa', $('#inputAvatar')[0].files[0]);  // jQuery 转换#}
+{#            formData.append('csrfmiddlewaretoken', "{{ csrf_token }}");  // jQuery 转换#}
+{#            $.ajax({#}
+{#                url: '/sign/upload/',#}
+{#                type: 'POST',#}
+{#                data: formData,#}
+{#                contentType: false,		// 告知jQuery不用处理数据(设置请求头)#}
+{#                processData: false,		// 告知jQuery不用处理数据(设置请求头)#}
+{#                success: function(arg){#}
+{#                                    var timestamp = new Date().getTime();#}
+{#                $("#showAvatar").prop("src", "/" + arg);#}
+{#                    alert(arg);#}
+{#                    console.log('fileinput', $('#avatarValue').val());#}
+{#                    $('#avatarValue').val(arg);#}
+{##}
+{##}
 {#                    $(this).prop("src", $(this).prop("src") + '?'+ timestamp);#}
-                }
-            })
-        }
-    );
+{#                }#}
+{#            })#}
+{#        }#}
+{#    );#}
 
 
 
-    $.loginCheck();
+    $.loginCheck("{{ csrf_token }}");
 
 </script>
 </body>

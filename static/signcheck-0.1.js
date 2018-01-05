@@ -23,10 +23,51 @@ function isTel(str) {
     return reg.test(str.trim())
 }
 
+
+function formCommit(csrf_token) {
+
+    var formData = new FormData();
+    formData.append('csrfmiddlewaretoken', csrf_token);
+    $('#sign-box input').each(function (k, v) {
+        console.log('input:', k, v);
+        if (v){
+
+            var name = $(v).prop('name');
+            var value = $(v).prop('value');
+            formData.append(name, value);
+        }
+    });
+
+    $.ajax({
+            url: '/sign/sign-up.html?md=post',
+            type: 'POST',
+            data: formData,
+            contentType: false,		// 告知jQuery不用处理数据(设置请求头)
+            processData: false,		// 告知jQuery不用处理数据(设置请求头)
+            dataType: "JSON",
+            success: function(arg){
+                console.log('arg.status', arg.status);
+                if (arg.status){
+                    self.location.href = '/index.html';
+                }
+                else {
+                    // console.log(arg.errors);
+                    $.each(arg.errors, function (k, v) {
+                        console.log('kv:', k, v[0]);
+                        if (k=='__all__'){
+                            k = 'code';
+                        }
+                        $('input[name="'+ k + '"]').next('span').text(v[0]);
+                    })
+                }
+            }
+    })
+}
+
 (function (jq) {
 
     jq.extend({
-        loginCheck: function () {
+        loginCheck: function (csrf_token) {
             $('#sign-btn, #reg-btn').click(function () {
                 var flag = true;
                 $('input').siblings('span').text('');
@@ -124,8 +165,9 @@ function isTel(str) {
                     return flag
                 }
 
-                return flag;
-
+                if (flag){
+                    formCommit(csrf_token);
+                }
             })
         }
     });
