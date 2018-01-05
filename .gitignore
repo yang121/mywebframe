@@ -105,3 +105,6 @@ venv.bak/
 
 # python缓存
 .pyc
+
+$test
+*.123
