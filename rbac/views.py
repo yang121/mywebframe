@@ -49,6 +49,7 @@ def sign_in(request):
 
         return render(request, 'sign/sign-in.html', {'obj': obj})
 
+
 def sign_out(request):
     request.session['login_status'] = False
     del request.session['username']
@@ -108,6 +109,7 @@ def sign_up(request):
         request.session['login_status'] = False
         print('注册失败',request.session)
         return render(request, 'sign/sign-up.html', {'obj': obj})
+
 
 def code(request):
     from utils.code_generator import rd_check_code

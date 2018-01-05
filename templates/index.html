@@ -1,35 +1,18 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <title>欢迎进入首页</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <link rel="stylesheet" href="/static/bootstrap-3.3.7-dist%20/css/bootstrap.css">
+{% extends 'index-layout.html' %}
+
+{% block css %}
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-        }
-        a {
-            text-decoration-line: none;
-        }
-
-        a:hover {
-            text-decoration-line: none;
-        }
-
-        .row{
-            margin-bottom: 30px;
-            position: relative;
-        }
-
         .point-active {
             background-color: white;
         }
 
         .ad-pic-box {
-            width: 1140px;
-            height: 300px;
+            width: 81.429em;
+            height: 21.429em;
+        }
+
+        #ad-switcher{
+            position: relative;
         }
 
         .ad-pic-box ul {
@@ -40,13 +23,18 @@
             position: absolute;
         }
 
+        .row {
+            margin-bottom: 3em;
+            margin-top: 1.8em;
+        }
+
         .col-sm-3 {
             margin-bottom: 3.8%;
         }
 
         #ad-points {
             bottom: 1.25%;
-            left: 45%;
+            left: 38em;
             z-index: 100;
             position: absolute;
             padding: 2px 0.5% ;
@@ -76,77 +64,16 @@
         }
 
         #ad-perv {
-            left: 1.25%;
+            left: 0.84em;
         }
 
         #ad-next {
-            right: 1.25%;
+            right: 0.83em;
         }
     </style>
-</head>
-<body>
-<nav class="navbar navbar-default">
-    <div class="container">
-        <!-- Brand and toggle get grouped for better mobile display -->
-        <div class="navbar-header">
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                    data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-                <span class="sr-only">Toggle navigation</span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-                <span class="icon-bar"></span>
-            </button>
-            <a class="navbar-brand" href="#">老扬BBS</a>
-        </div>
+{% endblock %}
 
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-                <li class="active"><a href="#">首页<span class="sr-only">(current)</span></a></li>
-                <li><a href="#">文章</a></li>
-            </ul>
-
-            <ul class="nav navbar-nav navbar-right">
-
-                {% if request.session.login_status %}
-                    <li>
-                        <a href="#">{{ request.session.username }}</a>
-                    </li>
-                    <a href="#"><img href="#" src="{{ request.session.avatar }}" style="width: 50px; height: 50px; padding: 0; margin: 0; float: left"></a>
-                    <li class="dropdown">
-                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
-                           aria-expanded="false">我<span class="caret"></span></a>
-                        <ul class="dropdown-menu">
-                            <li><a href="#">我的博客</a></li>
-                            <li><a href="#">个人资料</a></li>
-                            {% if request.session.backend %}
-                                <li><a href="/backend/">管理后台</a></li>
-                            {% endif %}
-                            <li><a href="#">设置</a></li>
-
-                            <li role="separator" class="divider"></li>
-                            <li><a id="SignOut" href="/sign/sign-out/">退出登录</a></li>
-                        </ul>
-                    </li>
-
-                {% else %}
-                    <li><a href="/sign/sign-in.html/">登录</a></li>
-                    <li><a href="/sign/sign-up.html/">注册</a><span class="sr-only">(current)</span></li>
-
-                {% endif %}
-
-
-            </ul>
-            <form class="nav navbar-form navbar-right">
-                <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Search">
-                </div>
-                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
-            </form>
-        </div><!-- /.navbar-collapse -->
-    </div><!-- /.container-->
-</nav>
-<div>
+{% block content %}
     <div class="container">
         <div class="row" id="ad-switcher">
             <div id="switch-btn-group" hidden>
@@ -164,7 +91,7 @@
                     {% for a in ads %}
                         <li class="si{{ a.place }}">
                             <a href="{{ a.link }}" class="ad-pic">
-                                <img class="img-rounded" style="width: 100%" src="{{ a.img }}">
+                                <img class="img-rounded" style="width: 100%" src="/{{ a.img }}">
                             </a>
                         </li>
                     {% endfor %}
@@ -173,76 +100,73 @@
 
         </div>
 
-
-
         <div class="row">
             {% for c in cols %}
                 <div class="col-sm-3">
-                    <a href="{{ c.link }}"><img class="img-rounded" style="width: 100%;" src="{{ c.img }}"></a>
+                    <a href="{{ c.link }}"><img class="img-rounded" style="width: 100%;" src="/{{ c.img }}"></a>
                 </div>
             {% endfor %}
         </div>
     </div>
-</div>
-<script src="/static/jquery-3.2.1.js"></script>
-<script src="/static/bootstrap-3.3.7-dist%20/js/bootstrap.js"></script>
-<script>
+{% endblock %}
 
-    var adsLength = {{ ads|length }};
+{% block js %}
+    <script>
 
-    var i = 0;
-    adNext();
-    sw = setInterval("adNext()", 3000);
+        var adsLength = {{ ads|length }};
 
-    function adNext() {
-        if (i >= adsLength){
-            i = 0;
+        var i = 0;
+        adNext();
+        sw = setInterval("adNext()", 3000);
+
+        function adNext() {
+            if (i >= adsLength){
+                i = 0;
+            }
+            i++;
+            $("#si" + i).addClass('point-active').siblings().removeClass('point-active');
+            $(".si" + i).fadeIn(800).siblings().fadeOut(800);
+            console.log(i);
         }
-        i++;
-        $("#si" + i).addClass('point-active').siblings().removeClass('point-active');
-        $(".si" + i).fadeIn(800).siblings().fadeOut(800);
-        console.log(i);
-    }
 
-    function adPerv() {
-        if (i <= 1){
-            i = adsLength + 1;
+        function adPerv() {
+            if (i <= 1){
+                i = adsLength + 1;
+            }
+            i--;
+            $("#si" + i).addClass('point-active').siblings().removeClass('point-active');
+            $(".si" + i).fadeIn(800).siblings().fadeOut(800);
         }
-        i--;
-        $("#si" + i).addClass('point-active').siblings().removeClass('point-active');
-        $(".si" + i).fadeIn(800).siblings().fadeOut(800);
-    }
 
-    $(".switch-btn").on({
-        mouseenter: function () {
-            $(this).css("opacity",1);
-        },
-        mouseleave: function () {
-            $(this).css("opacity",0.3);
-        }
-    });
+        $(".switch-btn").on({
+            mouseenter: function () {
+                $(this).css("background-color", "hsla(0,0%,0%,1)");
+                $(this).css("color", "white");
+            },
+            mouseleave: function () {
+                $(this).css("background-color", "hsla(0,0%,0%,0.3)");
+            }
+        });
 
-    $('#ad-perv').click(adPerv);
-    $('#ad-next').click(adNext);
+        $('#ad-perv').click(adPerv);
+        $('#ad-next').click(adNext);
 
-    $('#ad-switcher').on({
-        mouseenter:function () {
-            $('#switch-btn-group').show();
-            clearInterval(sw);
-        },
-        mouseleave:function () {
-            $('#switch-btn-group').hide();
-            sw = setInterval("adNext()", 3000);
-        }
-    });
+        $('#ad-switcher').on({
+            mouseenter:function () {
+                $('#switch-btn-group').show();
+                clearInterval(sw);
+            },
+            mouseleave:function () {
+                $('#switch-btn-group').hide();
+                sw = setInterval("adNext()", 3000);
+            }
+        });
 
-    $('.switch-point').mousemove(function () {
-            $(this).addClass('point-active').siblings().removeClass('point-active');
-            console.log(this.id);
-            $("." + this.id).fadeIn(800).siblings().fadeOut(800);
-            i = $(this).index() + 1;
-    })
-</script>
-
-</body>
-</html>
+        $('.switch-point').mouseenter(function () {
+                $(this).addClass('point-active').siblings().removeClass('point-active');
+                console.log(this.id);
+                $("." + this.id).fadeIn(800).siblings().fadeOut(800);
+                i = $(this).index() + 1;
+        })
+    </script>
+{% endblock %}
