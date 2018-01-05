@@ -103,8 +103,8 @@ venv.bak/
 # mypy
 .mypy_cache/
 
-# python缓存
-.pyc
+# python编译
+*.pyc
 
 $test
 *.123

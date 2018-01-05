@@ -43,6 +43,16 @@ class User(models.Model):
         return self.username
 
 
+class Blog(models.Model):
+    """
+    博客表
+    """
+    title = models.CharField(verbose_name='个人博客标题', max_length=64)
+    site = models.CharField(verbose_name="个人博客前缀",max_length=32, unique=True)
+    theme = models.CharField(verbose_name="博客主题",max_length=72)
+    user = models.OneToOneField(to='User', to_field='id')
+
+
 class UserFans(models.Model):
     """
     粉丝关系表
@@ -57,6 +67,96 @@ class UserFans(models.Model):
 
     def __str__(self):
         return "%s-%s" % (self.user.username, self.follower.username)
+
+class Category(models.Model):
+    """
+    博主个人文章分类表
+    """
+    title = models.CharField(verbose_name='分类标题', max_length=32)
+    blog = models.ForeignKey(verbose_name="所属博客", to="Blog", to_field="id")
+
+    def __str__(self):
+        return '%s-%s' % (self.blog.title, self.title)
+
+
+class Article(models.Model):
+    title = models.CharField(verbose_name='文章标题', max_length=128)
+    img = models.ImageField(verbose_name='文章图片', null=True)
+    summary = models.CharField(verbose_name="文章简介", max_length=255)
+    read_count = models.IntegerField(default=0)
+    comment_count = models.IntegerField(default=0)
+    up_count = models.IntegerField(default=0)
+    down_count = models.IntegerField(default=0)
+    create_time = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
+
+    blog = models.ForeignKey(verbose_name="所属博客", to="Blog", to_field="id")
+    category = models.ForeignKey(verbose_name="文章类型", to="Category", to_field="id", null=True)
+
+    type_choices = [
+        (1, "Python"),
+        (2, "Linux"),
+        (3, "OpenStack"),
+        (4, "Golang"),
+    ]
+
+    article_type_id = models.IntegerField(choices=type_choices, default=None)
+
+    tag = models.ManyToManyField(
+        to="Tag",
+        through="Article2Tag",
+        through_fields=('article', 'tag'),
+    )
+
+
+class Article2Tag(models.Model):
+    article = models.ForeignKey(verbose_name="文章", to="Article", to_field="id")
+    tag = models.ForeignKey(verbose_name="标签", to="Tag", to_field="id")
+
+    class Meta:
+        unique_together = [
+            ('article', 'tag'),
+        ]
+
+
+class ArticleDetail(models.Model):
+    """
+    文章详细表
+    """
+    content = models.TextField(verbose_name='文章内容')
+    article = models.OneToOneField(verbose_name="所属文章", to="Article", to_field='id')
+
+
+class UpDown(models.Model):
+    """
+    文章顶或踩
+    """
+    article = models.ForeignKey(verbose_name='文章', to='Article', to_field='id')
+    user = models.ForeignKey(verbose_name='赞或踩用户', to='User', to_field='id')
+    up = models.BooleanField(verbose_name='是否赞')
+
+    class Meta:
+        unique_together = [
+            ('article', 'user'),
+        ]
+
+
+class Tag(models.Model):
+    """
+    标签
+    """
+    title = models.CharField(verbose_name='分类标题', max_length=32)
+    blog = models.ForeignKey(verbose_name="所属博客", to="Blog", to_field="id")
+
+
+class Comment(models.Model):
+    """
+    评论表
+    """
+    content = models.CharField(verbose_name="评论内容", max_length=255)
+    create_time = models.DateTimeField(verbose_name="创建时间", auto_now_add=True, null=True)
+    reply = models.ForeignKey(verbose_name="回复评论", to="self", related_name="back", null=True)
+    article = models.ForeignKey(verbose_name="评论文章", to="Article", to_field="id")
+    user = models.ForeignKey(verbose_name="评论者", to="User", to_field='id')
 
 
 class UserGroup(models.Model):
@@ -165,110 +265,3 @@ class Permission2Action2Role(models.Model):
 
     def __str__(self):
         return "%s-%s-%s" % (self.permission, self.action, self.role,)
-
-
-
-
-class Column(models.Model):
-    caption = models.CharField(verbose_name='专栏标题', max_length=32)
-    keywords = models.ManyToManyField(
-        verbose_name='关键字',
-        to='Keyword',
-        through='Keyword2Column',
-        related_name='k2c',
-        through_fields=('column', 'keyword'),
-    )
-    img = models.FileField(verbose_name='图片', upload_to='static/imgs/cols/')
-    link = models.CharField(verbose_name='链接',max_length=128, null=True, blank=True)
-    create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True, null=True, blank=True)
-
-    def __str__(self):
-        return "%s[%s]" % (self.caption, self.keywords.all())
-
-
-class Keyword(models.Model):
-    caption = models.CharField(verbose_name='关键字名称', max_length=32, unique=True)
-
-    goods = models.ManyToManyField(
-        verbose_name='商品',
-        to='Goods',
-        through='Keyword2Goods',
-        related_name='g2k',
-        through_fields=('keyword', 'goods'),   # 坑坑坑！此处要按顺序放置字段，要与原表一样
-    )
-
-    columns = models.ManyToManyField(
-        verbose_name='专栏',
-        to='Column',
-        through='Keyword2Column',
-        related_name='c2k',
-        through_fields=('keyword', 'column'),
-    )
-
-    def __str__(self):
-        return "%s" % self.caption
-
-
-class Keyword2Column(models.Model):
-    keyword = models.ForeignKey('Keyword', verbose_name='关键字')
-    column = models.ForeignKey('Column', verbose_name='专栏',)
-
-    class Meta:
-        unique_together = (
-            ('keyword', 'column'),
-        )
-
-    def __str__(self):
-        return "%s-%s" % (self.column.caption, self.keyword.caption)
-
-
-class Keyword2Goods(models.Model):
-    keyword = models.ForeignKey('Keyword', verbose_name='关键字')
-    goods = models.ForeignKey('Goods', verbose_name='商品')
-
-    class Meta:
-        unique_together = (
-            ('keyword', 'goods'),
-        )
-
-    def __str__(self):
-        return "%s-%s" % (self.goods.caption, self.keyword.caption)
-
-
-class Goods(models.Model):
-    caption = models.CharField(verbose_name='商品标题', max_length=64)
-    brief = models.CharField(verbose_name='简介', max_length=128, null=True, blank=True)
-    keywords = models.ManyToManyField(
-        verbose_name='关键字',
-        to='Keyword',
-        through='Keyword2Goods',
-        related_name='k2g',
-        through_fields=('goods', 'keyword'),
-    )
-    img = models.FileField(verbose_name='图片', upload_to='static/imgs/goods/')
-    price = models.FloatField(verbose_name='价格', max_length=16)
-    create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True, null=True, blank=True)
-    brand = models.CharField(verbose_name='品牌', max_length=16, null=True, blank=True)
-    category = models.CharField(verbose_name='类别', max_length=16, null=True)
-
-    def __str__(self):
-        return "%s-%s" % (self.id, self.caption)
-
-
-class Ad(models.Model):
-    caption = models.CharField(verbose_name='广告标题', max_length=64)
-    link = models.CharField(verbose_name='链接', max_length=64)
-    img = models.FileField(verbose_name='图片', upload_to='static/imgs/ad/')
-    create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True, null=True, blank=True)
-    place_choices = (
-        (1, '第一位'),
-        (2, '第二位'),
-        (3, '第三位'),
-        (4, '第四位'),
-        (5, '第五位'),
-        (6, '第六位'),
-    )
-    place = models.IntegerField(verbose_name='位置', choices=place_choices, null=True, blank=True, unique=True)
-
-    def __str__(self):
-        return "%s[%s]" % (self.caption, self.place)

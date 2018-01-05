@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'rbac.middleware.rbac.RbacMiddleware',
 ]
 
-ROOT_URLCONF = 'OfficeWeb.urls'
+ROOT_URLCONF = 'MyBlog.urls'
 
 TEMPLATES = [
     {
@@ -73,7 +73,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'OfficeWeb.wsgi.application'
+WSGI_APPLICATION = 'MyBlog.wsgi.application'
 
 
 # Database
