@@ -1,0 +1,85 @@
+{% extends 'index-layout.html' %}
+{% block content %}
+    <div class="container">
+        <ul class="breadcrumb">
+            <li id="all-result"><a href="/search.html?keywords={{ search_key.keywords }}">全部结果</a></li>
+            {% if search_key.brand %}
+                <li><a href="/search.html?keywords={{ search_key.keywords }}">{{ search_key.brand }}</a></li>
+            {% endif %}
+            {% if search_key.category %}
+                <li><a href="/search.html?keywords={{ search_key.keywords }}">{{ search_key.category }}</a></li>
+            {% endif %}
+            <li id="keywords" class="active">{{ search_key.keywords }}</li>
+        </ul>
+
+        <table class="table">
+            <tr>
+                <td class="attr-key col-sm-1"><b>品牌</b></td>
+                <td class="attr-value col-sm-11">
+                    {% for b in search_info.brand_list %}
+                        <a href="/search.html?keywords={{ search_key.keywords }}&brand={% if search_key.brand %}{{ search_key.brand }} {% endif %}{{ b }}{% if search_key.category %}&category={{ search_key.category }}{% endif %}">
+                            <span>{{ b }}</span>
+                        </a>
+                    {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <td class="attr-key col-sm-1"><b>分类</b></td>
+                <td class="attr-value col-sm-11">
+                    {% for c in search_info.category_list %}
+                        <a href="/search.html?keywords={{ search_key.keywords }}{% if search_key.brand %}&brand={{ search_key.brand }}{% endif %}&category={% if search_key.category %}{{ search_key.category }} {% endif %}{{ c }}">
+                            <span>{{ c }}</span>
+                        </a>
+                    {% endfor %}
+                </td>
+            </tr>
+            <tr>
+                <td class="attr-key col-sm-1">关键词</td>
+                <td class="attr-value col-sm-11">
+                    {% for k in search_info.keyword_list %}
+                        <a href="/search.html?keywords={{ search_key.keywords }} {{ k }}{% if search_key.brand %}&brand={{ search_key.brand }}{% endif %}{% if search_key.category %}&category={{ search_key.category }}{% endif %}">
+                            <span style="">{{ k }}</span>
+                        </a>
+                    {% endfor %}
+                </td>
+            </tr>
+        </table>
+        <div class="panel panel-default">
+            <div class="panel-heading">共{{ search_info.goods|length }}件商品</div>
+            <div class="panel-body">
+                <div class="row">
+                    {% for g in search_info.goods %}
+                        <div class="col-sm-3" style="margin-bottom: 3em">
+                            <div class="">
+                                <img src="/{{ g.img }}">
+                                <div class="caption" >
+                                    <h5 style="height: 2.8em; overflow: hidden; line-height: 1.5em">{{ g.caption }}</h5>
+                                    <p style="color:#d9534f; height: 1.3em; font-size:0.2em; overflow: hidden;">
+                                        {% if g.brief %}{{ g.brief }}{% endif %}
+                                    </p>
+                                    <p style="color:#d9534f; font-size:1.5em;">￥{{ g.price }}</p>
+                                    <p>
+                                        <a href="#" class="btn btn-danger" role="button">立即购买</a>
+                                        <a href="#" class="btn btn-default" role="button">加入购物车</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block css %}
+<style>
+    .attr-value span {
+        padding: 0 2em;
+        word-break: keep-all;
+
+    }
+</style>
+{% endblock %}

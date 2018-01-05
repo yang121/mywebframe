@@ -63,7 +63,7 @@ class UserGroup(models.Model):
     """
     用户组表
     """
-    caption = models.CharField(verbose_name='组名', max_length=32)
+    caption = models.CharField(verbose_name='组名', max_length=32, unique=True)
 
     def __str__(self):
         return self.caption
@@ -86,7 +86,7 @@ class Role(models.Model):
     """
     角色表
     """
-    caption = models.CharField(verbose_name='角色', max_length=32)
+    caption = models.CharField(verbose_name='角色', max_length=32, unique=True)
 
     def __str__(self):
         return self.caption
@@ -131,7 +131,7 @@ class Permission(models.Model):
     """
     权限
     """
-    caption = models.CharField(verbose_name='权限标题', max_length=32)
+    caption = models.CharField(verbose_name='权限标题', max_length=32, unique=True)
     url = models.CharField(verbose_name='URL正则', max_length=128)
     menu = models.ForeignKey(Menu, verbose_name='所属菜单', related_name='permissions', null=True, blank=True)
 
@@ -187,7 +187,7 @@ class Column(models.Model):
 
 
 class Keyword(models.Model):
-    caption = models.CharField(verbose_name='关键字名称', max_length=32)
+    caption = models.CharField(verbose_name='关键字名称', max_length=32, unique=True)
 
     goods = models.ManyToManyField(
         verbose_name='商品',
@@ -237,7 +237,7 @@ class Keyword2Goods(models.Model):
 
 class Goods(models.Model):
     caption = models.CharField(verbose_name='商品标题', max_length=64)
-    brief = models.CharField(verbose_name='简介', max_length=128)
+    brief = models.CharField(verbose_name='简介', max_length=128, null=True, blank=True)
     keywords = models.ManyToManyField(
         verbose_name='关键字',
         to='Keyword',
@@ -248,6 +248,11 @@ class Goods(models.Model):
     img = models.FileField(verbose_name='图片', upload_to='static/imgs/goods/')
     price = models.FloatField(verbose_name='价格', max_length=16)
     create_time = models.DateTimeField(verbose_name='创建时间', auto_now_add=True, null=True, blank=True)
+    brand = models.CharField(verbose_name='品牌', max_length=16, null=True, blank=True)
+    category = models.CharField(verbose_name='类别', max_length=16, null=True)
+
+    def __str__(self):
+        return "%s-%s" % (self.id, self.caption)
 
 
 class Ad(models.Model):

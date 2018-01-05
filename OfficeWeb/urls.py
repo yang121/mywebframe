@@ -21,6 +21,7 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^sign/', include('rbac.urls')),
     url(r'^backend/', include('backend.urls')),
-    url(r'^index.html$', views.index),
-    url(r'', views.index),
+    url(r'^index.html', views.index),
+    url(r'^search.html', views.search),
+    url(r'^', views.index),
 ]
