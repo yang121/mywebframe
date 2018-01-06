@@ -7,7 +7,7 @@ from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.conf import settings
 import os
-
+import traceback
 
 def sign_in(request):
     if request.method == 'GET':
@@ -34,7 +34,7 @@ def sign_in(request):
                 request.session['username'] = user.username
                 request.session['uid'] = user.id
                 if user.avatar:
-                    request.session['avatar'] = user.avatar
+                    request.session['avatar'] = user.avatar.url
                 else:
                     request.session['avatar'] = settings.DEFAULT_IMG_PATH
                 initial_permission(request, user.id)
@@ -67,8 +67,8 @@ def sign_up(request):
         return render(request, 'sign/sign-up.html', {"obj": obj})
 
     elif request.method == 'POST':
-        print(request.POST)
-        obj = formformat.RegisterForm(request.POST)
+        print(request.POST, request.FILES)
+        obj = formformat.RegisterForm(request.POST, request.FILES)
         ret = {'status': True, 'errors': None}
 
         try:
@@ -86,26 +86,29 @@ def sign_up(request):
                 res = models.User.objects.create(**reg_data)
                 print('res:', res)
                 if res:
-                    user = models.User.objects.filter(**reg_data).first()
+                    username = obj.cleaned_data['username']
+                    user = models.User.objects.filter(username=username).first()
+                    print('user:', user)
+
                     request.session['login_status'] = True
                     request.session['username'] = user.username
                     request.session['uid'] = user.id
                     print(user.avatar)
                     if user.avatar:
-                        request.session['avatar'] = user.avatar
+                        request.session['avatar'] = user.avatar.url
                     else:
                         request.session['avatar'] = settings.DEFAULT_IMG_PATH
                     initial_permission(request, user.id)
                     print(request.session['rbac_permission_session_key'])
                     if request.session['rbac_permission_session_key'].get('/backend.html'):
                         request.session['backend'] = True
-                    print(request.session.items())
+                    print('session', request.session.items())
                     # return redirect('/index.html')
                     return JsonResponse(ret)
 
                 obj.add_error('__all__', ValidationError('服务器繁忙，请稍后再试'))
         except Exception as e:
-            print(e)
+            print(traceback.format_exc())
             obj.add_error('__all__', e)
 
         request.session['login_status'] = False
@@ -135,3 +138,4 @@ def upload(request):
             for chunk in file_obj.chunks():
                 f.write(chunk)
         return HttpResponse(file_path)
+

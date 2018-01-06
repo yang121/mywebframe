@@ -160,7 +160,7 @@
                         processData: false,		// 告知jQuery不用处理数据(设置请求头)
                         success: function (arg) {
                             $("#previewImg").prop("src", "/" + arg);
-                            alert(arg);
+                            console.log($(1, '#imgSelect').val());
                         }
                     })
                 }
@@ -172,20 +172,23 @@
          */
         function bindAvatar2(){
             $('#imgSelect').change(function(){
+                var img_obj = $(this).val();
+                console.log(img_obj);
                 var obj = $(this)[0].files[0];
                 // Ajax发送后台，并获取路径
                 // img.src = 获取路径
                 var v = window.URL.createObjectURL(obj);
                 $('#previewImg').attr('src',v);
-                $('#previewImg').load(function(){
+                $('#previewImg').on('load',function(){
                     window.URL.revokeObjectURL(v); // 手动释放内存
                 });
-
+                console.log(2, $('#imgSelect').prop('name'));
             })
         }
 
         function bindAvatar3(){
             $('#imgSelect').change(function(){
+                console.log(3);
                 var obj = $(this)[0].files[0];
                 // Ajax发送后台，并获取路径
                 // img.src = 获取路径
@@ -194,6 +197,7 @@
                     $('#previewImg').attr('src',this.result);
                 };
                 reader.readAsDataURL(obj);
+                console.log(3, $('#imgSelect').val());
             })
         }
 

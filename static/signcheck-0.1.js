@@ -29,38 +29,42 @@ function formCommit(csrf_token) {
     var formData = new FormData();
     formData.append('csrfmiddlewaretoken', csrf_token);
     $('#sign-box input').each(function (k, v) {
-        console.log('input:', k, v);
-        if (v){
-
-            var name = $(v).prop('name');
-            var value = $(v).prop('value');
+        var name = $(v).prop('name');
+        var value = $(v).prop('value');
+        if (name=='avatar'){
+            value = $(v)[0].files[0];
+        }
+        if (name =='gender' && !$(v).prop('checked')){
+            value = '';
+        }
+        if (name && value){
+            console.log(name, value);
             formData.append(name, value);
         }
     });
 
     $.ajax({
-            url: '/sign/sign-up.html?md=post',
-            type: 'POST',
-            data: formData,
-            contentType: false,		// 告知jQuery不用处理数据(设置请求头)
-            processData: false,		// 告知jQuery不用处理数据(设置请求头)
-            dataType: "JSON",
-            success: function(arg){
-                console.log('arg.status', arg.status);
-                if (arg.status){
-                    self.location.href = '/index.html';
-                }
-                else {
-                    // console.log(arg.errors);
-                    $.each(arg.errors, function (k, v) {
-                        console.log('kv:', k, v[0]);
-                        if (k=='__all__'){
-                            k = 'code';
-                        }
-                        $('input[name="'+ k + '"]').next('span').text(v[0]);
-                    })
-                }
+        url: '/sign/sign-up.html?md=post',
+        type: 'POST',
+        data: formData,
+        contentType: false,		// 告知jQuery不用处理数据(设置请求头)
+        processData: false,		// 告知jQuery不用处理数据(设置请求头)
+        dataType: "JSON",
+        success: function(arg){
+            console.log('arg.status', arg.status);
+            if (arg.status){
+                self.location.href = '/index.html';
             }
+            else {
+                $.each(arg.errors, function (k, v) {
+                    console.log('kv:', k, v[0]);
+                    if (k=='__all__'){
+                        k = 'code';
+                    }
+                    $('input[name="'+ k + '"]').next('span').text(v[0]);
+                })
+            }
+        }
     })
 }
 
@@ -128,7 +132,6 @@ function formCommit(csrf_token) {
                             if ($(v).val().length < 6) {
                                 $(v).siblings('span').text('密码长度必须大于6');
                                 flag = false;
-                                console.log('走这里:');
                                 return false
                             }
                             else if ($(v).val().length > 64) {
