@@ -25,6 +25,9 @@ def initial_permission(request, user_id):
 
     p2a = models.Permission2Action2Role.objects.filter(role__in=roles).values('permission__url',
                                                                               "action__code").distinct()
+    print('roles', roles)
+    print('p2a', p2a)
+
     user_permission_dict = {}
     for item in p2a:
         if item['permission__url'] in user_permission_dict:

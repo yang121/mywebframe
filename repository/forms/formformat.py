@@ -189,3 +189,23 @@ class RegisterForm(Form):
             if models.User.objects.filter(telephone=telephone).first():
                 raise ValidationError("此手机号码已被注册")
             return telephone
+
+
+
+class ReplyForm(Form):
+    content = fields.CharField(
+        required=True,
+        max_length=255,
+    )
+
+    reply = fields.IntegerField(
+        required=False
+    )
+
+    article = fields.IntegerField(
+        required=True
+    )
+
+    user = fields.IntegerField(
+        required=True
+    )

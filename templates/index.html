@@ -1,10 +1,357 @@
 {% extends 'index-layout.html' %}
 
 {% block css %}
+    <style>
+
+    .panel-body .col-xs-2 {
+        padding: 0;
+        display: inline-block;
+    }
+
+    .panel-body div img {
+        width: 100%;
+    }
+
+    .panel-body .col-xs-10 {
+        font-size: 1.2em;
+        height: 6.15em;
+        display: inline-block;
+    }
+
+    .panel-body .col-xs-10 .col-xs-12 {
+        position:absolute;
+        bottom: 0;
+        left: 0;
+        font-size: 0.8em;
+        display: inline-block;
+    }
+
+    .panel-body a {
+        margin-right: 1em;
+    }
+
+    .comment-area {
+        width:100%;
+        margin-top: 1em;
+        padding: 0;
+    }
+
+    .comment-area .panel {
+        margin-bottom: 0;
+    }
+
+    .media-object {
+        width: 24px; height: 24px;
+    }
+
+    .detail-link {
+        color: #9d9d9d;
+    }
+
+    .detail-link:hover {
+        color: #2e6da4;
+    }
+
+    .reply-input {
+        color: black;
+        width: 93.5%;
+        display: inline-block;
+        margin-right: 0.5em;
+        resize: none;
+        vertical-align: bottom
+    }
+
+    .reply-this, .delete-this {
+        cursor: pointer;
+    }
+
+    .reply-hint {
+        line-height: 3em;
+        margin-right: 0.5em;
+    }
+
+    .reply-cancel {
+        cursor: pointer;
+        line-height: 3em;
+    }
+
+    </style>
 {% endblock %}
 
 {% block content %}
+    <div class="container">
+        <div class="panel panel-default">
+            <div class="panel-body">
+                <a href="#"><span class="glyphicon glyphicon-edit"></span> 发帖</a>
+            </div>
+        </div>
+        {% for a in artis %}
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <a href="#"><img class="media-object"
+                                     style="display: inline-block"
+                                     src="{% if a.blog.user.avatar %}{{ a.blog.user.avatar }}{% else %}/static/imgs/avatar/default.jpeg{% endif %}">
+                        <b>{{ a.blog.user.username }}</b>,</a><span>{{ a.blog.title }}</span>
+                    <h4><a href="#">{{ a.title }}</a></h4>
+                    <div class="col-xs-2"><img class="img-rounded" src="/{{ a.img }}"></div>
+                    <div class="col-xs-10">
+                        <a class="detail-link" href="#">{{ a.summary }}<a href="#">阅读全文</a></a>
+                        <div class="col-xs-12">
+                            <a uid='{{ request.session.uid }}' aid='{{ a.id }}' style="cursor: pointer" class="add_up btn bg-info">
+                                <span class="glyphicon glyphicon-thumbs-up"></span> {{ a.up_count }}
+                            </a>
+                            <a aid='{{ a.id }}' val='{{ a.comment_count }}' class="open_comment" style="cursor: pointer"><span class="glyphicon glyphicon-comment"></span> {{ a.comment_count }}</a>
+                            <span style="cursor: default"><span class="glyphicon glyphicon-eye-open"> </span> {{ a.read_count }}</span>
+                        </div>
+                    </div>
+
+
+                    <div class="comment-area col-xs-12 hide">
+                        <div class="panel panel-default">
+                            <div class="panel-heading"><b>{{ a.comment_count }} 条评论</b></div>
+                            <ul class="list-group">
+                                <li class="list-group-item">
+                                    <form>
+                                        <div class="form-group" style="margin-bottom: 0">
+                                            <textarea aid='{{ a.id }}' uid='{{ request.session.uid }}' class="reply-input form-control" placeholder="写下你的评论.." rows="1"></textarea>
+                                            <button style="vertical-align: bottom" class="btn btn-primary reply-btn" type="button">评 论</button>
+                                        </div>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
 {% endblock %}
 
 {% block js %}
+    <script>
+    loginStat = '{{ request.session.login_status }}';
+    csrfToken = '{{ csrf_token }}';
+{#    csrfToken = $.cook('csrftoken');  // 需要导入插件#}
+    console.log(loginStat);
+    console.log(csrfToken);
+
+    function loginStatusDetect(loginStat) {
+        console.log('loginStat:', loginStat);
+        if (loginStat=="True"){
+            alert('请先登录你的账号??!');
+        }
+        else {
+            alert('请先登录你的账号!');
+            self.location.href = '/sign/sign-in.html/';
+            console.log(loginStat);
+        }
+    }
+
+    $('.add_up').click(function () {
+        loginStatusDetect(loginStat);
+        var aid = $(this).attr('aid');
+        var uid = $(this).attr('uid');
+        var $this = $(this);
+        $.ajax({
+            url:'/like/'+ aid + '/' + uid + '/',
+            type: 'GET',
+            dataType: 'JSON',
+            success:function (arg) {
+                console.log(arg);
+                if (arg['status']){
+                    if (arg['up_stat']){
+                        $this.addClass('active').html(
+                            '<span class="glyphicon glyphicon-thumbs-up"></span> ' + arg['up_count']
+                        ).css('color','black');
+                    }
+                    else {
+                        $this.removeClass('active').html(
+                            '<span class="glyphicon glyphicon-thumbs-up"></span> ' + arg['up_count']
+                        ).css('color','#337ab7');
+                    }
+                }
+                else {
+                    alert('暂时无法点赞，请稍后再试')
+                }
+            }
+        })
+    });
+
+    function loadCommentItem(dataItem) {
+        console.log('dataItem: ', dataItem);
+        var listGroupItem = $('<li></li>').addClass('list-group-item comment-item');
+        var avatar = dataItem.user__avatar;
+        if (!avatar){
+            avatar = 'static/imgs/avatar/default.jpeg';
+        }
+        var mediaObject = $('<img></img>').prop('src', '/' + avatar);
+        var avatarLink = $('<a></a>').prop('href', dataItem.user__blog__site).append(mediaObject);
+        var mediaLeft = $('<div></div>').addClass('media-left').append(avatarLink);
+        var mediaHeading = $('<h5></h5>').addClass('media-heading').text(dataItem.user__username).attr('username', dataItem.user__username);
+        if (dataItem.reply__user__username){
+            var replyText = $('<span></span>').text(' 回复 ');
+            var replyTarget = $('<a></a>').text(dataItem.reply__user__username).prop('href', dataItem.reply__user__blog__site);
+            mediaHeading.append(replyText).append(replyTarget);
+        }
+        var $doSthForThis = $('<a></a>');
+        if ($('.reply-input').attr('uid')==dataItem.user_id){
+            var doSthForThis = $doSthForThis.addClass('delete-this').text(' 删除').attr(
+                'aid', dataItem.article_id
+            ).attr('cid', dataItem.id);
+        }
+        else {
+            var doSthForThis = $doSthForThis.addClass('reply-this').text(' 回复').attr('comment-id', dataItem.id);
+        }
+        var mediaBody = $('<div></div>').addClass('media-body').text(dataItem.content).prepend(mediaHeading).append(doSthForThis);
+
+        listGroupItem.append(mediaLeft).append(mediaBody);
+        return listGroupItem
+    }
+
+    function loadCommentData(aid, $listGroup) {
+        $.ajax({
+            url:'/comment/'+ aid + '/',
+            type: 'GET',
+            dataType: "JSON",
+            success:function (arg) {
+                console.log(arg);
+                $listGroup.children('.comment-item').remove();
+                if (arg.status){
+                    for (var i=0; i<arg.data.length; i++){
+                        var dataItem = arg.data[i];
+                        console.log('listGroup: ', $listGroup);
+                        $listGroup.prepend(loadCommentItem(dataItem));
+                    }
+                    var commentNum = $listGroup.children().length - 1;
+                    if (!$listGroup.children().length){
+                        commentNum = 0;
+                    }
+                    $listGroup.siblings().attr('val', commentNum).children('b').text(commentNum + ' 条评论');
+                    console.log(commentNum)
+                }
+                else {
+                    alert('暂时无法加载评论，请稍后再试')
+                }
+            }
+        })
+    }
+
+
+    $(document).on({'click':function () {
+        loginStatusDetect(loginStat);
+        var $commentArea = $(this).parent().parent().next('.comment-area');
+        console.log('opened:', $(this).attr('opened'));
+        if ($(this).attr('opened')=='true'){
+            $(this).attr('opened', false);
+            $commentArea.addClass('hide');
+            var num = $commentArea.children('.panel').children('.panel-heading').attr('val');
+            console.log('num:', num);
+            $(this).html('<span class="glyphicon glyphicon-comment"></span> ' + num);
+        }
+        else {
+            var aid = $(this).attr('aid');
+            $(this).attr('opened', true);
+            $commentArea.removeClass('hide');
+            $listGroup = $commentArea.find('ul');
+            $(this).text('收起评论');
+
+            loadCommentData(aid, $listGroup);
+        }
+    }},'.open_comment');
+
+    $('.reply-input').on({
+        focusin:function () {
+            loginStatusDetect(loginStat);
+            $(this).prop('rows', 3);
+        }
+    });
+
+    $('.reply-btn').click(function () {
+        var $textArea = $(this).siblings('textarea');
+        var content = $textArea.val();
+        var article_id = $textArea.attr('aid');
+        var user_id = $textArea.attr('uid');
+        var reply_id = $textArea.attr('reply');
+
+        var formData = new FormData();
+        formData.append('article', article_id);
+        formData.append('user', user_id);
+        if (reply_id) {
+            formData.append('reply', reply_id);
+        }
+        formData.append('content', content);
+        formData.append('csrfmiddlewaretoken', csrfToken);
+
+        console.log('formData:', formData);
+        $.ajax({
+            url:'/comment/'+ article_id + '/' + user_id + '?md=post',
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success:function (arg) {
+                console.log('arg:', arg);
+                if (arg.status){
+                    alert('评论发表成功');
+                    $textArea.val('');
+                }
+                else {
+                    alert('评论未能发表成功，请稍候再试', arg.errors)
+                }
+                var $listGroup = $textArea.parent().parent().parent().parent();
+                loadCommentData(article_id, $listGroup);
+            }
+        })
+    });
+
+
+    $(document).on({click:function () {
+        var targetName = $(this).siblings().attr('username');
+        var replyHint = $('<span></span>').text(' 回复: ' + targetName).addClass('reply-hint');
+        var replyCancel = $('<a></a>').text('取消').addClass('reply-cancel');
+        var $textArea = $(this).parent().parent().siblings().find('textarea');
+        console.log('this', this);
+        console.log('$textarea', $textArea);
+        $textArea.siblings('.reply-hint').remove();
+        $textArea.siblings('.reply-cancel').remove();
+        $textArea.removeAttr('reply');
+        $textArea.before(replyHint).before(replyCancel);
+        replyCancel.click(function () {
+            $textArea.siblings('.reply-hint').remove();
+            $textArea.siblings('.reply-cancel').remove();
+            $textArea.removeAttr('reply');
+        });
+        var reply = $(this).attr('comment-id');
+        $textArea.attr('reply', reply);
+        $textArea.focus();
+    }},".reply-this");
+
+    $(document).on({click:function () {
+        var aid = $(this).attr('aid');
+        var cid = $(this).attr('cid');
+        var $listGroup = $(this).parent().parent().parent();
+{#        console.log('data', data);#}
+        $.ajax({
+            url:'/comment/'+ aid + '?md=delete',
+            type: 'POST',
+            headers: {'X-CSRFToken': csrfToken},
+            contentType:"application/x-www-form-urlencoded",
+            data: {'article_id':aid, 'id':cid},
+            dataType: 'JSON',
+            success:function (arg) {
+                console.log('arg:', arg);
+                if (arg.status){
+                    alert('删除成功');
+                }
+                else {
+                    alert('评论未能删除成功，请稍候再试', arg.errors)
+                }
+                loadCommentData(aid, $listGroup);
+            }
+        })
+
+    }}, ".delete-this")
+
+    </script>
 {% endblock %}

@@ -1,10 +1,16 @@
-from django.shortcuts import render
+from django.shortcuts import render, HttpResponse
 from repository import models
 from django.db.models import Count
+from django.core.serializers import serialize
+from django.http.response import JsonResponse
+from django.conf import settings
+
 
 def index(request):
 
     artis = models.Article.objects.all()
+    print(artis[0].img)
+    print(artis[0].blog.user.avatar)
     ret = {'artis': artis}
 
     return render(request, 'index.html', ret)
@@ -118,3 +124,112 @@ def search(request):
     }
 
     return render(request, 'search.html', ret)
+
+
+def comment(request, article_id, *args):
+    try:
+        permission_code = request.permission_code
+    except Exception:
+        permission_code = settings.RBAC_DEFAULT_QUERY_VALUE.upper()
+
+    print('permission_code', permission_code)
+
+    if permission_code == 'POST':
+        print('POSTING....')
+        from repository.forms.formformat import ReplyForm
+        obj = ReplyForm(request.POST)
+        print('POST:',request.POST)
+        ret = {'status': True, 'errors': None}
+        if not obj.is_valid():
+            ret['errors'] = obj.errors
+            ret['status'] = False
+            print(1, ret)
+            return JsonResponse(ret)
+
+        print('clean_data:', obj.cleaned_data)
+
+        query_dict = obj.cleaned_data
+
+        query_dict['user_id'] = query_dict.pop('user')
+        query_dict['article_id'] = query_dict.pop('article')
+        if query_dict.get('reply'):
+            query_dict['reply_id'] = query_dict.pop('reply')
+
+        res = models.Comment.objects.create(**query_dict)
+        print(res)
+        if not res:
+            ret['status'] = False
+        from django.db.models import F
+        models.Article.objects.filter(id=article_id).update(comment_count=F('comment_count')+1)
+        print(ret)
+        return JsonResponse(ret)
+
+    elif permission_code == 'DELETE':
+        query_dict = request.POST.dict()
+        print('POST:', request.POST)
+        ret = {'status': True, 'errors': None}
+        if not query_dict:
+            ret['status'] = False
+            ret['errors'] = '删除错误，请稍后再试'
+            return JsonResponse(ret)
+
+        res = models.Comment.objects.filter(**query_dict).delete()
+        from django.db.models import F
+        article_id = query_dict['article_id']
+        res2 = models.Article.objects.filter(id=article_id).update(comment_count=F('comment_count')-1)
+        if not res or not res2:
+            ret['status'] = False
+            ret['errors'] = '服务器繁忙，请稍后再试'
+
+        print('DELETED!', ret)
+        return JsonResponse(ret)
+
+    else:
+        ret = {'status':True, 'data': None}
+        data = models.Comment.objects.filter(article_id=article_id).order_by('create_time').values(
+            'reply__user__username',
+            'user__blog__site',
+            'id',
+            'user_id',
+            'user__avatar',
+            'reply__user__blog__site',
+            'content',
+            'user__username',
+            'article_id'
+        )
+        ret['data'] = list(data)
+        print(ret)
+        return JsonResponse(ret, safe=False)
+
+
+def like(request, article_id, uid):
+    ret = {'status': True, 'up_stat':None, 'up_count': None}
+    from django.db.models import F
+    updown_objs = models.UpDown.objects.filter(article_id=article_id, user_id=uid)
+    article_objs = models.Article.objects.filter(id=article_id)
+    up_count = article_objs.first().up_count
+    if updown_objs:
+        up_stat = updown_objs.first().up
+        if up_stat:
+            print(updown_objs)
+            updown_objs.update(up=False)
+            up_stat = False
+            article_objs.update(up_count=F('up_count')-1)
+            up_count -= 1
+        else:
+            updown_objs.update(up=True)
+            up_stat = True
+            article_objs.update(up_count=F('up_count')+1)
+            up_count += 1
+
+        ret['up_count'] = up_count
+        ret['up_stat'] = up_stat
+    else:
+        models.UpDown.objects.create(article_id=article_id, user_id=uid, up=True)
+        models.Article.objects.filter(id=article_id).update(up_count=F('up_count') + 1)
+        up_count += 1
+        ret['up_stat'] = True
+        ret['up_count'] = up_count
+
+    print(ret)
+    return JsonResponse(ret)

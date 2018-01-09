@@ -132,6 +132,9 @@ RBAC_NO_AUTH_URL = [
     '/index.html',
     '/admin.*',
     '/sign.*',
+    # '/comment.*',
+    # '/like.*',
+    '',
 ]
 # session中保存权限信息的Key
 RBAC_PERMISSION_SESSION_KEY = "rbac_permission_session_key"

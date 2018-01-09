@@ -23,5 +23,7 @@ urlpatterns = [
     url(r'^backend/', include('backend.urls')),
     url(r'^index.html', views.index),
     url(r'^search.html', views.search),
-    url(r'^', views.index),
+    url(r'^comment/(?P<article_id>\d+)', views.comment),
+    url(r'^like/(?P<article_id>\d+)/(?P<uid>\d+)', views.like),
+    url(r'^$', views.index),
 ]

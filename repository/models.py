@@ -52,6 +52,8 @@ class Blog(models.Model):
     theme = models.CharField(verbose_name="博客主题",max_length=72)
     user = models.OneToOneField(to='User', to_field='id')
 
+    def __str__(self):
+        return '%s-%s' % (self.site, self.user.username)
 
 class UserFans(models.Model):
     """
@@ -81,7 +83,7 @@ class Category(models.Model):
 
 class Article(models.Model):
     title = models.CharField(verbose_name='文章标题', max_length=128)
-    img = models.ImageField(verbose_name='文章图片', null=True)
+    img = models.ImageField(verbose_name='文章图片', upload_to='static/imgs/articles/small', null=True)
     summary = models.CharField(verbose_name="文章简介", max_length=255)
     read_count = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
@@ -90,16 +92,16 @@ class Article(models.Model):
     create_time = models.DateTimeField(verbose_name="创建时间", auto_now_add=True)
 
     blog = models.ForeignKey(verbose_name="所属博客", to="Blog", to_field="id")
-    category = models.ForeignKey(verbose_name="文章类型", to="Category", to_field="id", null=True)
+    category = models.ForeignKey(verbose_name="博客分类", to="Category", to_field="id", null=True)
 
     type_choices = [
-        (1, "Python"),
-        (2, "Linux"),
-        (3, "OpenStack"),
-        (4, "Golang"),
+        (1, "游戏"),
+        (2, "编程"),
+        (3, "生活"),
+        (4, "社交"),
     ]
 
-    article_type_id = models.IntegerField(choices=type_choices, default=None)
+    article_type_id = models.IntegerField(verbose_name="文章类型", choices=type_choices, default=None)
 
     tag = models.ManyToManyField(
         to="Tag",
@@ -107,6 +109,12 @@ class Article(models.Model):
         through_fields=('article', 'tag'),
     )
 
+    def __str__(self):
+        for i in self.type_choices:
+            if i[0] == self.article_type_id:
+                category = i[1]
+                break
+        return '%s-%s-%s' % (category, self.title, self.blog.site)
 
 class Article2Tag(models.Model):
     article = models.ForeignKey(verbose_name="文章", to="Article", to_field="id")
@@ -125,6 +133,9 @@ class ArticleDetail(models.Model):
     content = models.TextField(verbose_name='文章内容')
     article = models.OneToOneField(verbose_name="所属文章", to="Article", to_field='id')
 
+    def __str__(self):
+        return self.article.title
+
 
 class UpDown(models.Model):
     """
@@ -139,6 +150,9 @@ class UpDown(models.Model):
             ('article', 'user'),
         ]
 
+    def __str__(self):
+        return '%s-%s-%s' % (self.article.title, self.user.username, self.up)
+
 
 class Tag(models.Model):
     """
@@ -146,7 +160,8 @@ class Tag(models.Model):
     """
     title = models.CharField(verbose_name='分类标题', max_length=32)
     blog = models.ForeignKey(verbose_name="所属博客", to="Blog", to_field="id")
-
+    def __str__(self):
+        return '%s-%s' % (self.title, self.blog.site)
 
 class Comment(models.Model):
     """
@@ -154,9 +169,12 @@ class Comment(models.Model):
     """
     content = models.CharField(verbose_name="评论内容", max_length=255)
     create_time = models.DateTimeField(verbose_name="创建时间", auto_now_add=True, null=True)
-    reply = models.ForeignKey(verbose_name="回复评论", to="self", related_name="back", null=True)
+    reply = models.ForeignKey(verbose_name="回复评论", to="self", related_name="back", null=True, blank=True)
     article = models.ForeignKey(verbose_name="评论文章", to="Article", to_field="id")
     user = models.ForeignKey(verbose_name="评论者", to="User", to_field='id')
+
+    def __str__(self):
+        return '%s:%s->%s《%s》' % (self.user.username, self.content, self.reply, self.article)
 
 
 class UserGroup(models.Model):

@@ -9,6 +9,7 @@ from django.conf import settings
 import os
 import traceback
 
+
 def sign_in(request):
     if request.method == 'GET':
         obj = formformat.LoginForm()
@@ -63,7 +64,6 @@ def sign_out(request):
 def sign_up(request):
     if request.method == 'GET':
         obj = formformat.RegisterForm()
-        print('CSRF token:',request.session.items())
         return render(request, 'sign/sign-up.html', {"obj": obj})
 
     elif request.method == 'POST':
