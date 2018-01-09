@@ -6,13 +6,22 @@ from django.http.response import JsonResponse
 from django.conf import settings
 
 
-def index(request):
-
-    artis = models.Article.objects.all()
-    print(artis[0].img)
-    print(artis[0].blog.user.avatar)
-    ret = {'artis': artis}
-
+def index(request, *args):
+    if not args:
+        current = 1
+    else:
+        current = int(args[0])
+    print('current:',current)
+    from utils.my_paginator import PageInfo, Custompager
+    artis_objs = models.Article.objects.all()
+    total_item_count = artis_objs.count()
+    paginator = PageInfo(current, total_item_count, 2)
+    start = paginator.From()
+    end = paginator.To()
+    total_page = paginator.TotalPage()
+    artis = artis_objs[start:end]
+    paginator_html = Custompager('/index.html/', current, total_page)
+    ret = {'artis': artis, 'paginator_html': paginator_html}
     return render(request, 'index.html', ret)
 
 
@@ -233,3 +242,10 @@ def like(request, article_id, uid):
 
     print(ret)
     return JsonResponse(ret)
+
+def write(request):
+    if request.permission_code == 'GET':
+        return render(request, 'write.html')
+
+    else:
+        return HttpResponse('ok')
