@@ -1,7 +1,5 @@
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, redirect
 from repository import models
-from django.db.models import Count
-from django.core.serializers import serialize
 from django.http.response import JsonResponse
 from django.conf import settings
 
@@ -23,116 +21,6 @@ def index(request, *args):
     paginator_html = Custompager('/index.html/', current, total_page)
     ret = {'artis': artis, 'paginator_html': paginator_html}
     return render(request, 'index.html', ret)
-
-
-def search(request):
-    # keywords = request.GET.get('keywords').strip().split(' ')
-    print('GET.values:', request.GET.dict())
-
-    #获取request中的键值对
-    request_dict = request.GET.dict()
-    if not request_dict['keywords']:
-        most_keyword = models.Keyword2Goods.objects.values_list('keyword__caption').annotate(count=Count(1)).order_by('-count').first()[0]
-        request_dict['keywords'] = most_keyword
-        print('most_keyword:', most_keyword)
-    condition_dict = {}
-    search_key = {}
-
-    # 去重并重新构造
-    for k in request_dict:
-        v = request_dict[k].strip().split(' ')
-        i_list = []
-        for i in v:
-            if i not in i_list:
-                i_list.append(i)
-            else:
-                if k == 'keywords':
-                    continue
-                i_list.remove(i)
-        condition_dict[k] = i_list
-        new_v = ' '.join(i_list)
-        search_key[k] = new_v
-
-    print('condition_dict:', condition_dict)
-    print('search_key:', search_key)
-
-
-    # 创建查询语句
-    from django.db.models import Q
-
-    con = Q()
-    for k, v in condition_dict.items():
-        # print(k, v)
-        q = Q()
-        q.connector = 'OR'
-        if k == 'keywords':
-            k = 'keywords__caption'
-        # v = v.strip().split(' ')
-        print(v)
-        for i in v:
-            q.children.append((k, i))
-        con.add(q, 'AND')
-
-    # 增加标题查找
-    print(con)
-    caption_q = Q()
-    caption_q.connector = 'AND'
-    for j in condition_dict['keywords']:
-        caption_q.children.append(('caption__contains', j))
-    con.add(caption_q, 'OR')
-
-    # 查找对象
-    goods_obj = models.Goods.objects.filter(con).distinct()
-    print(goods_obj.query)
-
-    # 查找商品
-    goods = goods_obj.all()
-    print(goods)
-
-    # 查找关键字
-    keywords = models.Keyword2Goods.objects.filter(goods__in=goods).values_list('keyword__caption').annotate(count=Count(1))
-    print('keywords：', keywords)
-    keywords_list = [x[0] for x in keywords]
-    for k in keywords_list:
-        if search_key.get('keywords') and k in search_key.get('keywords'):
-            keywords_list.remove(k)
-    print('keywords_list:', keywords_list)
-
-    # 查找品牌
-    brand = goods_obj.values('brand').annotate(count=Count(1)).order_by('-count')
-    brand_list = []
-    for b in brand:
-        v = b.get('brand')
-        if search_key.get('brand') and v in search_key.get('brand'):
-            continue
-        brand_list.append(v)
-
-    print('brand_list:', brand_list)
-
-    # 查找类别
-    category = goods_obj.values('category').annotate(count=Count(1)).order_by('-count')
-    category_list = []
-    for c in category:
-        v = c.get('category')
-        if search_key.get('category') and v in search_key.get('category'):
-            continue
-
-        category_list.append(v)
-    print('category_list:', category_list)
-
-    # 构造返回值
-
-    ret = {
-        'search_info': {
-            'goods': goods,
-            'brand_list': brand_list,
-            'category_list': category_list,
-            'keyword_list': keywords_list
-        },
-        'search_key': search_key
-    }
-
-    return render(request, 'search.html', ret)
 
 
 def comment(request, article_id, *args):
@@ -243,9 +131,62 @@ def like(request, article_id, uid):
     print(ret)
     return JsonResponse(ret)
 
-def write(request):
-    if request.permission_code == 'GET':
-        return render(request, 'write.html')
 
+def write(request):
+    print('session:',request.session.items())
+    print('permission_code:',request.permission_code)
+    from repository.forms.formformat import ArticleForm
+    if request.method == 'GET':
+        site = request.session['site']
+        blog_id = models.Blog.objects.filter(site=site).values_list('id').first()[0]
+        print('blog_id', blog_id)
+        obj = ArticleForm({'blog': blog_id})
+        return render(request, 'write.html', {'obj': obj})
     else:
-        return HttpResponse('ok')
+        obj = ArticleForm(request.POST, request.FILES)
+        print('is valid:', obj.is_valid())
+        print('errors:', obj.errors.items())
+        if obj.is_valid():
+            data = obj.cleaned_data
+            data['blog_id'] = data.pop('blog')
+            content = data.pop('content')
+            tags = data.pop('tag')
+            print('tags:', tags)
+            art_res = models.Article.objects.create(**data)
+            data.pop('img')
+            aid = models.Article.objects.filter(**data).values_list('id').first()[0]
+            tag_obj_list = []
+            for i in tags:
+
+                tag_obj_list.append(models.Article2Tag(article_id=aid, tag_id=int(i)))
+
+            print('aid', aid)
+
+            print(tag_obj_list)
+
+            models.Article2Tag.objects.bulk_create(tag_obj_list)
+
+            detail_res = models.ArticleDetail.objects.create(content=content, article_id=aid)
+            if art_res and detail_res:
+                return redirect('/index.html')
+            else:
+                return HttpResponse('fail')
+        else:
+            return render(request, 'write.html', {'obj': obj})
+
+def upload_img(request):
+    import os
+    # upload_type = request.GET.get('dir')
+    file_obj = request.FILES.get('imgFile')
+    file_path = os.path.join('static/imgs/upload',file_obj.name)
+    with open(file_path,'wb') as f:
+        for chunk in file_obj.chunks():
+            f.write(chunk)
+
+    dic = {
+        'error': 0,
+        'url': '/' + file_path,
+        'message': '上传图片失败，请稍后再试'
+    }
+    import json
+    return HttpResponse(json.dumps(dic))

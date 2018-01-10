@@ -82,7 +82,7 @@
     <div class="container">
         <div class="panel panel-default">
             <div class="panel-body">
-                <a href="#"><span class="glyphicon glyphicon-edit"></span> 发帖</a>
+                <a href="/write?md=get"><span class="glyphicon glyphicon-edit"></span> 发帖</a>
             </div>
         </div>
         {% for a in artis %}
@@ -144,7 +144,6 @@
     function loginStatusDetect(loginStat) {
         console.log('loginStat:', loginStat);
         if (loginStat=="True"){
-            alert('请先登录你的账号??!');
         }
         else {
             alert('请先登录你的账号!');

@@ -134,7 +134,7 @@ RBAC_NO_AUTH_URL = [
     '/sign.*',
     # '/comment.*',
     # '/like.*',
-    '',
+    '/$',
 ]
 # session中保存权限信息的Key
 RBAC_PERMISSION_SESSION_KEY = "rbac_permission_session_key"
@@ -155,8 +155,18 @@ RBAC_MENU_PERMISSION_KEY = "rbac_menu_permission_key"
 RBAC_THEME = "default"
 
 
-# 设置session有效期
+# session有效期
 # SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 # SESSION_COOKIE_AGE = 60*60*24
 
+
+# 默认头像地址
 DEFAULT_IMG_PATH = 'static/imgs/avatar/default.jpeg'
+
+# 分页功能设置
+# 默认每页的显示条数
+PER_PAGE_ITEM_AMOUNT_DEFAULT = 5
+# 显示多少个页码
+PAGE_NUM_AMOUNT = 11
+# 前后页码显示的数量
+PREV_OR_NEXT_PAGE_AMOUNT = 5

@@ -25,7 +25,7 @@ class RbacMiddleware(MiddlewareMixin):
 
         """获取当前用户session中的权限信息"""
         permission_dict = request.session.get(settings.RBAC_PERMISSION_SESSION_KEY)
-        # print('permission_dict: ', permission_dict)
+        print('permission_dict: ', permission_dict)
         if not permission_dict:
             return HttpResponse(settings.RBAC_PERMISSION_MSG)
 
@@ -33,8 +33,8 @@ class RbacMiddleware(MiddlewareMixin):
         flag = False
         for pattern, code_list in permission_dict.items():
             upper_code_list = [item.upper() for item in code_list]
-            # print('pattern:', pattern)
-            # print('path_info:',request.path_info)
+            print('pattern:', pattern)
+            print('path_info:',request.path_info)
             if re.match(pattern, request.path_info):
                 request_permission_code = request.GET.get(settings.RBAC_QUERY_KEY, settings.RBAC_DEFAULT_QUERY_VALUE).upper()
                 if request_permission_code in upper_code_list:

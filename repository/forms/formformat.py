@@ -209,3 +209,51 @@ class ReplyForm(Form):
     user = fields.IntegerField(
         required=True
     )
+
+
+class ArticleForm(Form):
+    img = fields.FileField()
+
+    title = fields.CharField(
+        max_length=64,
+        widget=widgets.TextInput(
+            attrs={'id': 'title-input', 'placeholder': "输入文章标题", 'class': 'form-control'}
+        )
+    )
+
+    content = fields.CharField(
+        widget=widgets.Textarea(
+            attrs={'id': 'content-input', 'placeholder': "输入文章正文", 'class': 'form-control'}
+        )
+    )
+
+    summary = fields.CharField(
+        widget=widgets.Textarea(
+            attrs={'id': 'summary-input', 'rows': "3", 'placeholder': "输入简介", 'class': 'form-control'}
+        ))
+
+    article_type_choice = models.Article.type_choices
+    article_type_id = fields.IntegerField(
+        widget=widgets.Select(
+            choices=article_type_choice,
+            attrs={'id': 'type-input', 'placeholder': "输入简介", 'class': 'form-control'}
+        )
+    )
+
+    blog = fields.IntegerField(
+        widget=widgets.NumberInput(attrs={'id': 'blog-input', 'class': 'hide'})
+    )
+
+    tag_type_choice = list(models.Tag.objects.values_list('id', 'title'))
+
+    tag = fields.MultipleChoiceField(
+        choices=tag_type_choice,
+        widget=widgets.CheckboxSelectMultiple(
+            attrs={'id': 'tag-input', 'placeholder': "输入简介", 'class': 'checkbox-inline'}
+        )
+    )
+
+    def clean_content(self):
+        old = self.cleaned_data['content']
+        from utils.xss_defend import xss
+        return xss(old)

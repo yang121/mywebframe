@@ -24,7 +24,7 @@ urlpatterns = [
     url(r'^index.html/(\d+)', views.index),
     url(r'^index.html', views.index),
     url(r'^write', views.write),
-    url(r'^search.html', views.search),
+    url(r'^upload_img', views.upload_img),
     url(r'^comment/(?P<article_id>\d+)', views.comment),
     url(r'^like/(?P<article_id>\d+)/(?P<uid>\d+)', views.like),
     url(r'^$', views.index),
