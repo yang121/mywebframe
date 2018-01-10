@@ -63,9 +63,9 @@
     │   ├── my_paginator.py         # 分页工具（页码数量限制）
     │   ├── session_manage.py       # session登录管理工具
     │   └── xss_defend.py           # 编辑器xss工具防御工具
-    ├── web                         # 系统日志
+    ├── web                         # 程序核心app
     │   ├── __init__.py
-    │   ├── app.py                  # 下载日志
+    │   ├── app.py                  
     │   └── view.py                 # 首页视图函数
     ├── .gitignore
     ├── db.sqlite3
