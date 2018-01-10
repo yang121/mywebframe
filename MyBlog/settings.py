@@ -39,7 +39,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'web.apps.WebConfig',         # 你的app名
     'rbac',
-    'backend',
     'repository',
 ]
 
@@ -132,8 +131,6 @@ RBAC_NO_AUTH_URL = [
     '/index.html',
     '/admin.*',
     '/sign.*',
-    # '/comment.*',
-    # '/like.*',
     '/$',
 ]
 # session中保存权限信息的Key
