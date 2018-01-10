@@ -205,33 +205,6 @@
         $(this).prop('src', this.src + '?');
     });
 
-{#    $('#inputAvatar').change(#}
-{#        function () {#}
-{#            var formData = new FormData();#}
-{#            formData.append('fafafa', $('#inputAvatar')[0].files[0]);  // jQuery 转换#}
-{#            formData.append('csrfmiddlewaretoken', "{{ csrf_token }}");  // jQuery 转换#}
-{#            $.ajax({#}
-{#                url: '/sign/upload/',#}
-{#                type: 'POST',#}
-{#                data: formData,#}
-{#                contentType: false,		// 告知jQuery不用处理数据(设置请求头)#}
-{#                processData: false,		// 告知jQuery不用处理数据(设置请求头)#}
-{#                success: function(arg){#}
-{#                                    var timestamp = new Date().getTime();#}
-{#                $("#showAvatar").prop("src", "/" + arg);#}
-{#                    alert(arg);#}
-{#                    console.log('fileinput', $('#avatarValue').val());#}
-{#                    $('#avatarValue').val(arg);#}
-{##}
-{##}
-{#                    $(this).prop("src", $(this).prop("src") + '?'+ timestamp);#}
-{#                }#}
-{#            })#}
-{#        }#}
-{#    );#}
-
-
-
     $.loginCheck("{{ csrf_token }}");
 
 </script>

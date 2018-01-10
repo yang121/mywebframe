@@ -1,12 +1,3 @@
-"""
-分页时需要做三件事：
-
-- 创建处理分页数据的类
-- 根据分页数据获取数据
-- 输出分页HTML，即：［上一页］［1］［2］［3］［4］［5］［下一页］
-"""
-
-
 from django.utils.safestring import mark_safe
 from django.conf import settings
 
@@ -32,15 +23,6 @@ class PageInfo(object):
 
 
 def Custompager(baseurl, currentPage, totalpage):# 基础页，当前页，总页数
-    perPager = 11
-    # 总页数<11
-    # 0 -- totalpage
-    # 总页数>11
-    # 当前页大于5 currentPage-5 -- currentPage+5
-    # currentPage+5是否超过总页数,超过总页数，end就是总页数
-    # 当前页小于5 0 -- 11
-    begin = 0
-    end = 0
 
     if totalpage <= settings.PAGE_NUM_AMOUNT:
         begin = 0

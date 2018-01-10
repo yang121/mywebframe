@@ -335,7 +335,6 @@
         var aid = $(this).attr('aid');
         var cid = $(this).attr('cid');
         var $listGroup = $(this).parent().parent().parent();
-{#        console.log('data', data);#}
         $.ajax({
             url:'/comment/'+ aid + '?md=delete',
             type: 'POST',

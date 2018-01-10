@@ -53,7 +53,7 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
                 <li class="active"><a href="/index.html">首页<span class="sr-only">(current)</span></a></li>
-                <li><a href="#">文章</a></li>
+{#                <li><a href="#">文章</a></li>#}
             </ul>
 
             <ul class="nav navbar-nav navbar-right">
@@ -67,13 +67,12 @@
                         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
                            aria-expanded="false">我<span class="caret"></span></a>
                         <ul class="dropdown-menu">
-                            <li><a href="#">我的博客</a></li>
-                            <li><a href="#">个人资料</a></li>
+                            <li class="disabled"><a>我的博客</a></li>
+                            <li class="disabled"><a>个人资料</a></li>
                             {% if request.session.backend %}
                                 <li><a href="/backend/">管理后台</a></li>
                             {% endif %}
-                            <li><a href="#">设置</a></li>
-
+                            <li class="disabled"><a href="#">设置</a></li>
                             <li role="separator" class="divider"></li>
                             <li><a id="SignOut" href="/sign/sign-out/">退出登录</a></li>
                         </ul>
@@ -87,12 +86,6 @@
 
 
             </ul>
-            <form class="nav navbar-form navbar-right" method="get" action="/search.html">
-                <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Search" name="keywords" value="{{ keywords }}{{ search_key.keywords }}">
-                </div>
-                <button type="submit" class="btn btn-default"><span class="glyphicon glyphicon-search"></span></button>
-            </form>
         </div><!-- /.navbar-collapse -->
     </div><!-- /.container-->
 </nav>

@@ -176,7 +176,6 @@ def write(request):
 
 def upload_img(request):
     import os
-    # upload_type = request.GET.get('dir')
     file_obj = request.FILES.get('imgFile')
     file_path = os.path.join('static/imgs/upload',file_obj.name)
     with open(file_path,'wb') as f:

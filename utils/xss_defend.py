@@ -15,7 +15,7 @@ def xss(old):
         if tag.name not in valid_tag:
             tag.decompose()
         if tag.attrs:
-            for k in list(tag.attrs.keys()): # {id:'i1',a=123,b=999}
+            for k in list(tag.attrs.keys()):
                 if k not in valid_tag[tag.name]:
                     del tag.attrs[k]
     content_str = soup.decode()

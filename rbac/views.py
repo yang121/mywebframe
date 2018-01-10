@@ -55,21 +55,6 @@ def sign_in(request):
             print(user)
 
             if user:
-                # print(user.username)
-                # print(user.id)
-                # print(user.avatar)
-                # request.session['login_status'] = True
-                # request.session['username'] = user.username
-                # request.session['uid'] = user.id
-                # if user.avatar:
-                #     request.session['avatar'] = user.avatar.url
-                # else:
-                #     request.session['avatar'] = settings.DEFAULT_IMG_PATH
-                # initial_permission(request, user.id)
-                # print(request.session['rbac_permission_session_key'])
-                # if request.session['rbac_permission_session_key'].get('/backend.html'):
-                #     request.session['backend'] = True
-                # print(request.session.items())
                 session = SessionManage(request)
                 session.sign_in(user)
                 return redirect('/index.html')
@@ -82,12 +67,6 @@ def sign_in(request):
 
 
 def sign_out(request):
-    # request.session['login_status'] = False
-    # del request.session['username']
-    # del request.session['uid']
-    # del request.session['avatar']
-    # del request.session[settings.RBAC_MENU_PERMISSION_SESSION_KEY]
-    # del request.session[settings.RBAC_PERMISSION_SESSION_KEY]
     session = SessionManage(request)
     session.sign_out()
     print(request.session.items())
@@ -123,22 +102,9 @@ def sign_up(request):
                     user = models.User.objects.filter(username=username).first()
                     print('user:', user)
 
-                    # request.session['login_status'] = True
-                    # request.session['username'] = user.username
-                    # request.session['uid'] = user.id
-                    # print(user.avatar)
-                    # if user.avatar:
-                    #     request.session['avatar'] = user.avatar.url
-                    # else:
-                    #     request.session['avatar'] = settings.DEFAULT_IMG_PATH
-                    # initial_permission(request, user.id)
-                    # print(request.session['rbac_permission_session_key'])
-                    # if request.session['rbac_permission_session_key'].get('/backend.html'):
-                    #     request.session['backend'] = True
                     session = SessionManage(request)
                     session.sign_in(user)
                     print('session', request.session.items())
-                    # return redirect('/index.html')
                     return JsonResponse(ret)
 
                 obj.add_error('__all__', ValidationError('服务器繁忙，请稍后再试'))
